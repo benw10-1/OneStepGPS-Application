@@ -2,6 +2,7 @@ package main
 
 import (
 	. "server/config"
+	. "server/handlers"
 	"net/http"
 	"log"
 	"os"
@@ -15,6 +16,8 @@ func main() {
 		log.Fatal("Please set API_KEY environment variable in .env file")
 		os.Exit(1)
 	}
+
+	http.HandleFunc("/api/getInfo", GetAPI)
 
 	fs := http.FileServer(http.Dir("../client/dist"))
 	http.Handle("/", fs)
