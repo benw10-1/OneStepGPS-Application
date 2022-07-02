@@ -1,9 +1,12 @@
 import { reactive } from "vue";
-import { Requests } from "@/helpers";
 
 export default reactive({
-    data: {},
-    async refresh() {
-        this.data = await Requests.getInfo();
+    data: [],
+    async setData(data) {
+        this.data = data
+        console.log(this.data)
+    },
+    log() {
+        console.log(this.data)
     }
 });

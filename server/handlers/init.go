@@ -2,32 +2,33 @@ package api
 
 import (
 	. "server/config"
+	// . "server/store"
 	"net/http"
 	"fmt"
 	"io/ioutil"
 )
 
-func GetAPI(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Getting API info")
-	
-	URL := "https://track.onestepgps.com/v3/api/public/device?latest_point=true&api-key=" + GetEnv("API_KEY", "")
 
-	resp, err := http.Get(URL)
+// func GetAPI(w http.ResponseWriter, r *http.Request) {
+// 	resp, err := http.Get(URL)
 
-	if err != nil {
-		fmt.Println(err)
-	}
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
 
-	resBody, err := ioutil.ReadAll(resp.Body)
+// 	resBody, err := ioutil.ReadAll(resp.Body)
 
-	if err != nil {
-		fmt.Println(err)
-	}
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
 
-	fmt.Println("Got API info")
+// 	fmt.Println("Got API info")
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
+// 	
 
-	w.Write(resBody)
-}
+// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+// 	w.Header().Set("Access-Control-Allow-Headers", "*")
+
+// 	w.Write(resBody)
+// }
+
