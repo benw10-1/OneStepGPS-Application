@@ -2,17 +2,17 @@ package main
 
 import (
 	. "server/config"
-	// . "server/handlers"
-	. "server/store"
+	"server/handlers"
 	"net/http"
 	"log"
-	// "os"
 )
 
 func main() {
 	port := GetEnv("PORT", "3000")
 
-	// http.HandleFunc("/api/", GetAPI)
+	http.HandleFunc("/login", handlers.Login)
+	http.HandleFunc("/signup", handlers.SignUp)
+	http.HandleFunc("/preferences", handlers.Preferences)
 
 	fs := http.FileServer(http.Dir("../client/dist"))
 	http.Handle("/", fs)
