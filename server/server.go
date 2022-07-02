@@ -17,7 +17,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	http.HandleFunc("/api/getInfo", GetAPI)
+	http.HandleFunc("/api/info", GetAPI)
 
 	fs := http.FileServer(http.Dir("../client/dist"))
 	http.Handle("/", fs)

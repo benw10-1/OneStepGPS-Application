@@ -26,5 +26,8 @@ func GetAPI(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Got API info")
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+
 	w.Write(resBody)
 }
