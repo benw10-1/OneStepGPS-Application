@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar" @click="Holder.store.log">
+  <div class="sidebar">
     <div class="sorting-container">
       <div class="search-bar">
         <!-- <input type="text" placeholder="Search" v-model="search" @keyup.enter="search"> -->
@@ -20,24 +20,25 @@ import { Holder } from '../helpers'
 export default {
   name: 'SideBar',
   props: {
-
   },
   mounted() {
-    Holder.onUpdate(this.$forceUpdate)
+    this.funcIndex = Holder.onUpdate((data) => {
+      this.devices = data
+    })
   },
   unmounted() {
-    Holder.removeUpdate(this.$forceUpdate)
+    Holder.removeUpdate(this.funcIndex)
   },
   data() {
     return {
-      Holder
+      funcIndex: 0,
+      devices: [],
+      search: '',
     }
   },
 }
-
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .sidebar {
   width: 400px;
@@ -54,5 +55,4 @@ export default {
   align-items: center;
   flex-direction: row;
 }
-
 </style>

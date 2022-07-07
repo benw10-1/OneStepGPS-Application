@@ -1,46 +1,53 @@
-// import { Requests } from ".";
+import { Requests } from ".";
 import Dummy from "../dummy/data.json";
 import { apiStore } from "../stores";
 
 function Holder () {
     let data = {};
-    let udpateFuncs = []
+    let updateFuncs = []
     const store = apiStore;
-
+    // get data from API URL
     async function refresh() {
-        // try {
-        //     data = await Requests.getInfo();
-        // }
-        // catch (err) {
-        //     data = Dummy;
-        // }
-        data = Dummy;
-        data = data.result_list ?? [];
-        for (const func of udpateFuncs) {
+        try {
+            data = await Requests.getAPIData();
+        }
+        catch (err) {
+            data = Dummy;
+        }
+        data = data?.result_list ?? [];
+        for (const func of updateFuncs) {
             if (func) func(data);
         }
         store.data = data;
+
+        return data;
     }
 
     function onUpdate(callback) {
-        udpateFuncs.push(callback);
+        updateFuncs.push(callback);
+        return updateFuncs.length - 1;
     }
 
     function removeUpdate(callback) {
-        udpateFuncs = udpateFuncs.filter(func => func !== callback);
+        if (typeof callback === 'number') {
+            updateFuncs.splice(callback, 1);
+        }
+        else {
+            updateFuncs = updateFuncs.filter(func => func !== callback);
+        }
     }
 
     refresh();
 
-    const interval = setInterval(refresh, 10000);
+    // const interval = setInterval(refresh, 10000);
 
     return {
         get: () => data,
-        refresh: () => refresh(),
-        onUpdate: (callback) => onUpdate(callback),
+        refresh,
+        onUpdate,
         removeUpdate,
         store,
-        interval
+        // interval
     }
 }
 

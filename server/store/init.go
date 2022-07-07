@@ -1,28 +1,35 @@
+// Load a struct from a file into memory, and write it back to the file whenever it is changed
 package store
 
 import (
-	"io/ioutil"
-	"golang.org/x/crypto/bcrypt"
 	"encoding/json"
+	"io/ioutil"
+
+	"golang.org/x/crypto/bcrypt"
 	// "fmt"
 )
 
+// User data structure
 type User struct {
-	Name string
+	Name     string
 	Password string
-	APIKey string
+	APIKey   string
+	// key value pairs for preferences for formless yet structured
 	Preferences map[string]string
 }
 
+// User without password
 type CleanUser struct {
-	Name string
+	Name   string
 	APIKey string
 }
 
+// Structure of the JSON file
 type JSONStruct struct {
 	Users []User
 }
 
+// Declare all methods
 type JSONStructor interface {
 	AddUser(name string, password string, apiKey string)
 	GetUser(name string) *User
@@ -34,6 +41,7 @@ type JSONStructor interface {
 	CorrectCredentials(name string, password string) bool
 }
 
+// Indirectly implement the GetUsers method
 func (x *JSONStruct) GetUsers() []User {
 	return x.Users
 }
@@ -47,6 +55,7 @@ func (x *JSONStruct) IsUnique(name string, apiKey string) bool {
 	}
 	return true
 }
+
 // Creates a new user in the store
 func (x *JSONStruct) AddUser(name string, password string, apiKey string) bool {
 	// Check if the user name and API key are unique
@@ -56,9 +65,9 @@ func (x *JSONStruct) AddUser(name string, password string, apiKey string) bool {
 	}
 	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 	// Add the user to the store
 	map_ := make(map[string]string)
 	map_["test"] = "test"
@@ -67,6 +76,7 @@ func (x *JSONStruct) AddUser(name string, password string, apiKey string) bool {
 
 	return true
 }
+
 // Validate the user name and password
 func (x *JSONStruct) CorrectCredentials(name string, password string) bool {
 	for _, user := range x.GetUsers() {
@@ -80,6 +90,7 @@ func (x *JSONStruct) CorrectCredentials(name string, password string) bool {
 	}
 	return false
 }
+
 // Get a user from the store
 func (x *JSONStruct) GetUser(name string) *CleanUser {
 	for _, user := range x.GetUsers() {
@@ -91,6 +102,7 @@ func (x *JSONStruct) GetUser(name string) *CleanUser {
 	return nil
 }
 
+// Remove a user from the store
 func (x *JSONStruct) RemoveUser(name string) bool {
 	for i, user := range x.GetUsers() {
 		if user.Name == name {
@@ -101,6 +113,7 @@ func (x *JSONStruct) RemoveUser(name string) bool {
 	return false
 }
 
+// Check if the APIKey is valid
 func (x *JSONStruct) APIKeyExists(apiKey string) bool {
 	for _, user := range x.GetUsers() {
 		if user.APIKey == apiKey {
@@ -110,6 +123,7 @@ func (x *JSONStruct) APIKeyExists(apiKey string) bool {
 	return false
 }
 
+// Gets a user's preferences
 func (x *JSONStruct) GetPreferences(name string) map[string]string {
 	for _, user := range x.GetUsers() {
 		if user.Name == name {
@@ -119,28 +133,46 @@ func (x *JSONStruct) GetPreferences(name string) map[string]string {
 	return nil
 }
 
+// Sets a user's preferences
 func (x *JSONStruct) SetPreferences(name string, preferences map[string]string) {
 	for i, user := range x.GetUsers() {
 		if user.Name == name {
+			// Set the preferences by reference to original user in array
 			x.Users[i].Preferences = preferences
 		}
 	}
 }
 
+// Sets a user's API key
+func (x *JSONStruct) SetAPIKey(name string, apiKey string) *CleanUser {
+	for i, user := range x.GetUsers() {
+		if user.Name == name {
+			x.Users[i].APIKey = apiKey
+			return &CleanUser{user.Name, apiKey}
+		}
+	}
+
+	return nil
+}
+
+// Interface for the data store
 type Storer interface {
-	Get() (*JSONStruct, error) 
+	Get() (*JSONStruct, error)
 	Save() error
 }
 
+// Top-level data store struct
 type DataStore struct {
-	dataRef *JSONStruct
+	dataRef  *JSONStruct
 	filepath string
 }
 
+// Get the data stored in the store
 func (x *DataStore) Get() *JSONStruct {
 	return x.dataRef
 }
 
+// Save the data stored in the store
 func (x *DataStore) Save() error {
 	data, err := json.Marshal(*x.dataRef)
 	if err != nil {
@@ -153,6 +185,7 @@ func (x *DataStore) Save() error {
 	return nil
 }
 
+// Constructor for the data store
 func initStore(filepath string) *DataStore {
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
@@ -162,10 +195,11 @@ func initStore(filepath string) *DataStore {
 	store := &DataStore{}
 	store.filepath = filepath
 	store.dataRef = &JSONStruct{}
-	
+	// load file into store memory
 	_ = json.Unmarshal(data, store.dataRef)
 
 	return store
 }
 
+// global variable for single data store across all files
 var Store = initStore("data.json")
