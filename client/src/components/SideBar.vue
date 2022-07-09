@@ -8,9 +8,9 @@
 
       </div>
     </div>
-    <div v-for="device in Holder.store.data" class="device-container" v-bind:key="device.device_id">
+    <!-- <div v-for="device in Holder.store.data" class="device-container" v-bind:key="device.device_id">
       <div class=""></div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -23,8 +23,8 @@ export default {
   },
   mounted() {
     this.funcIndex = Holder.onUpdate((data) => {
-      this.devices = data
-    })
+      this.devices = data instanceof Array ? [...data] : { ...data }
+    }) 
   },
   unmounted() {
     Holder.removeUpdate(this.funcIndex)

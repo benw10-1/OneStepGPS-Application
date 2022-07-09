@@ -18,12 +18,12 @@ export default {
   },
   data() {
     return {
-      loggedIn: Auth.loggedIn(),
+      loggedIn: Auth.loggedIn()
     }
   },
   mounted() {
-    Auth.onLogin(() => {
-      this.loggedIn = !!Auth.getProfile()?.APIKey
+    Auth.onLogin((data) => {
+      this.loggedIn = !!data?.APIKey
     })
     Auth.onLogout(() => {
       this.loggedIn = false

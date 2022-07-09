@@ -1,11 +1,11 @@
 import decode from "jwt-decode"
 
 export default {
-    getProfile() {
-        const tok = this.getToken()
+    getProfile(token) {
+        const tok = token ?? this.getToken()
         if (!tok) return null
 
-        return decode(tok).data
+        return decode(tok).user
     },
     loggedIn() {
         const token = this.getToken()
@@ -16,6 +16,7 @@ export default {
         // Decode the token to get its expiration time that was set by the server
         const decoded = decode(token)
         // If the expiration time is less than the current time (in seconds), the token is expired and we return `true`
+        if (!decoded?.user?.APIKey) return true
         if (decoded.exp < Date.now() / 1000) {
             this.logout()
             return true
@@ -29,7 +30,11 @@ export default {
     },
     login(idToken) {
         localStorage.setItem('id_token', idToken)
-        if (this.onLogin) this.onLogin()
+        if (this.onLogin) {
+            const prof = this.getProfile(idToken)
+            console.log(prof)
+            this.onLogin(prof)
+        }
     },
     logout() {
         localStorage.removeItem('id_token')

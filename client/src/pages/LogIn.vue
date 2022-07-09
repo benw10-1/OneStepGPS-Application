@@ -7,32 +7,25 @@
         <div class="login-body">
             <div class="login-form">
                 <div class="login-form-header">
-                    <h1 v-if="switch_">Sign up</h1>
-                    <h1 v-else>Sign in</h1>
+                    <h1>{{ switch_ ? "Sign up" : "Log in" }}</h1>
                 </div>
                 <div class="login-form-body">
                     <div v-if="keySwitch" class="api-form-input">
-                        <input type="text" placeholder="API Key" v-model="APIKey" v-on:keyup="(e) => {setAPIKey(e.currentTarget.value)}" />
+                        <input type="text" placeholder="API Key" v-model="APIKey"
+                            v-on:input="(e) => { setAPIKey(e.currentTarget.value) }" />
                     </div>
                     <div v-else class="login-form-input">
-                        <input type="text" placeholder="John Doe" v-model="Name" v-on:keyup="(e) => {setName(e.currentTarget.value)}" />
-                        <input type="password" placeholder="Password" v-model="Password" v-on:keyup="(e) => {setPass(e.currentTarget.value)}" />
+                        <input type="text" placeholder="John Doe" v-model="Name"
+                            v-on:input="(e) => { setName(e.currentTarget.value) }" />
+                        <input type="password" placeholder="Password" v-model="Password"
+                            v-on:input="(e) => { setPass(e.currentTarget.value) }" />
                     </div>
                     <div class="login-form-tip" v-if="!keySwitch">
-                        <span v-if="switch_" v-on:click="other">Already have an account?</span>
-                        <span v-else v-on:click="other">Don't have an account?</span>
+                        <span v-on:click="other">{{ switch_ ? "Already have an account?" : "Don't have an account?" }}</span>
                     </div>
                     <div class="login-form-button">
                         <button @click="login">
-                            <span v-if="keySwitch">
-                                Submit
-                            </span>
-                            <span v-else-if="switch_">
-                                Sign up
-                            </span>
-                            <span v-else>
-                                Sign in
-                            </span>
+                            {{ keySwitch ? "Submit" : (switch_ ? "Sign up" : "Log in" )}}
                         </button>
                     </div>
                 </div>
@@ -61,7 +54,11 @@ export default {
     methods: {
         async login() {
             if (this.Name && this.Password) {
-                let data = this.switch_ ? await Requests.signup(this.Name, this.Password) : await Requests.login(this.Name, this.Password)
+                let data = this.keySwitch ?
+                    await Requests.setAPIKey(this.APIKey) :
+                    (this.switch_ ?
+                        await Requests.signup(this.Name, this.Password) :
+                        await Requests.login(this.Name, this.Password))
                 if (!data?.Token) {
                     this.Error = "Invalid username or password"
                     return
@@ -100,7 +97,10 @@ export default {
     justify-content: center;
 }
 
-.login-text {
+.login-text {}
 
+.login-body {
+    box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px, rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
+    width: 400px;
 }
 </style>

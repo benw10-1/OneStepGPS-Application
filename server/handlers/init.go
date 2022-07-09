@@ -136,7 +136,7 @@ func SetAPIKey(w http.ResponseWriter, r *http.Request) {
 	}
 	Headers(w)
 	// guard clause
-	if r.Header.Get("Authorization") == "" {
+	if r.Header.Get("Authorization") == "" || len(r.Header.Get("Authorization")) < 8 {
 		http.Error(w, "No authorization header", http.StatusUnauthorized)
 		return
 	}
@@ -151,6 +151,7 @@ func SetAPIKey(w http.ResponseWriter, r *http.Request) {
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
+
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusInternalServerError)
 	}

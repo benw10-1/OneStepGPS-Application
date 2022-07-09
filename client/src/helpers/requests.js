@@ -6,8 +6,6 @@ const HOST_URL = 'http://localhost:3000/';
 async function base(url, override={}) {
     let token = Auth.getToken();
 
-    if (token && Auth.isTokenExpired(token)) token = '';
-
     const options = {
         method: 'GET',
         headers: {
@@ -17,9 +15,9 @@ async function base(url, override={}) {
         },
         ...override
     }
-    console.log(url)
+
     return fetch(url, options).then(res => res.json()).catch(err => {
-        console.log(err);
+        console.log(err, url);
         return false;
     });
 }
@@ -34,8 +32,8 @@ async function login(Name, Password) {
             Password
         })
     }).then(data => {
-        if (data.success) {
-            Auth.login(data.token);
+        if (data?.Token) {
+            Auth.login(data.Token);
         }
         return data;
     })
@@ -51,8 +49,8 @@ async function signup(Name, Password) {
             Password
         })
     }).then(data => {
-        if (data.success) {
-            Auth.login(data.token);
+        if (data?.Token) {
+            Auth.login(data.Token);
         }
         return data;
     })
@@ -65,4 +63,20 @@ async function getAPIData() {
     return base(url);
 }
 
-export default { getAPIData, base, login, signup };
+async function setAPIKey(key) {
+    const url = HOST_URL + 'api/setAPIKey';
+
+    return base(url, {
+        method: 'POST',
+        body: JSON.stringify({
+            key
+        })
+    }).then(data => {
+        if (data?.Token) {
+            Auth.login(data.Token);
+        }
+        return data;
+    })
+}
+
+export default { getAPIData, base, login, signup, setAPIKey };
