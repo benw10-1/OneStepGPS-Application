@@ -5,27 +5,27 @@
             <p>Use the One Step GPS public API to display your data</p>
         </div>
         <div class="login-body">
-            <div class="login-form">
+            <div class="login-inner">
                 <div class="login-form-header">
                     <h1>{{ switch_ ? "Sign up" : "Log in" }}</h1>
                 </div>
-                <div class="login-form-body">
-                    <div v-if="keySwitch" class="api-form-input">
+                <div class="login-form-body" v-on:keydown="(e) => { if (e.key === 'Enter') login() }">
+                    <div v-if="keySwitch" class="login-form-input">
                         <input type="text" placeholder="API Key" v-model="APIKey"
                             v-on:input="(e) => { setAPIKey(e.currentTarget.value) }" />
                     </div>
                     <div v-else class="login-form-input">
-                        <input type="text" placeholder="John Doe" v-model="Name"
+                        <input type="text" placeholder="JohnDoe77" v-model="Name"
                             v-on:input="(e) => { setName(e.currentTarget.value) }" />
                         <input type="password" placeholder="Password" v-model="Password"
                             v-on:input="(e) => { setPass(e.currentTarget.value) }" />
                     </div>
-                    <div class="login-form-tip" v-if="!keySwitch">
-                        <span v-on:click="other">{{ switch_ ? "Already have an account?" : "Don't have an account?" }}</span>
-                    </div>
-                    <div class="login-form-button">
+                    <div class="login-form-submit" v-if="!keySwitch">
+                        <span v-on:click="other" class="login-form-switch">
+                            {{ switch_ ? "Already have an account?" : "Don't have an account?" }}
+                        </span>
                         <button @click="login">
-                            {{ keySwitch ? "Submit" : (switch_ ? "Sign up" : "Log in" )}}
+                            {{ keySwitch ? "Submit" : (switch_ ? "Sign up" : "Log in") }}
                         </button>
                     </div>
                 </div>
@@ -49,11 +49,20 @@ export default {
             Password: '',
             APIKey: '',
             Error: '',
+            collapsed: window.innerWidth < 975,
+            small: window.innerWidth < 450
         }
+    },
+    mounted() {
+        window.addEventListener('resize', this.resizer)
+    },
+    unmounted() {
+        window.removeEventListener('resize', this.resizer)
     },
     methods: {
         async login() {
             if (this.Name && this.Password) {
+                this.Error = ''
                 let data = this.keySwitch ?
                     await Requests.setAPIKey(this.APIKey) :
                     (this.switch_ ?
@@ -83,6 +92,10 @@ export default {
         setAPIKey(key) {
             const cleaned = key.trim()
             this.APIKey = cleaned
+        },
+        resizer() {
+            this.collapsed = window.innerWidth < 975
+            this.small = window.innerWidth < 450
         }
     },
 }
@@ -95,12 +108,58 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: v-bind("collapsed ? 'column' : 'row'");
 }
 
-.login-text {}
+.login-text {
+    margin-right: v-bind("collapsed ? '0' : '102px'");
+    margin-bottom: v-bind("collapsed ? '102px' : '0'");
+}
+
+.login-text h1,
+.login-form-header h1 {
+    margin: 0;
+    font-size: 2.125rem;
+    font-weight: 400;
+    line-height: 1.235;
+    letter-spacing: .0125em;
+    color: rgb(25, 118, 210);
+}
+
+.login-text p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.75;
+    letter-spacing: .0125em;
+    color: rgba(0, 0, 0, 0.87)
+}
 
 .login-body {
     box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px, rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
-    width: 400px;
+    width: v-bind("small ? '100%' : '400px'");
+    background-color: white;
+    border-radius: 4px;
+    position: relative;
+    height: 370px;
+    padding: 24px;
+    display: flex;
+    box-sizing: border-box;
+}
+.login-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.login-form-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1
+}
+.login-form-input {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: center;
 }
 </style>
