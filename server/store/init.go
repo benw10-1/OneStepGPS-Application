@@ -4,9 +4,9 @@ package store
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
-	// "fmt"
 )
 
 // User data structure
@@ -39,11 +39,39 @@ type JSONStructor interface {
 	SetPreferences(name string, preferences map[string]string)
 	GetPreferences(name string) map[string]string
 	CorrectCredentials(name string, password string) bool
+	GetDevices(name string) string
 }
 
 // Indirectly implement the GetUsers method
 func (x *JSONStruct) GetUsers() []User {
 	return x.Users
+}
+
+// API proxy (no CORS on the server)
+func (x *JSONStruct) GetDevices(name string) string {
+	// Get the user
+	for _, user := range x.GetUsers() {
+		if user.Name == name {
+			requestURL := "https://track.onestepgps.com/v3/api/public/device-info?state_detail=true&api-key=" + user.APIKey
+
+			req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+			if err != nil {
+				return "Error making request"
+			}
+
+			res, err := http.DefaultClient.Do(req)
+			if err != nil {
+				return "Error making request"
+			}
+
+			resBody, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				return "Could not read response"
+			}
+			return string(resBody)
+		}
+	}
+	return ""
 }
 
 // Checks if the user name and API key are unique

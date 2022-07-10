@@ -14,6 +14,7 @@ func main() {
 	http.HandleFunc("/api/signup", handlers.SignUp)
 	http.HandleFunc("/api/preferences", handlers.Preferences)
 	http.HandleFunc("/api/setAPIKey", handlers.SetAPIKey)
+	http.HandleFunc("/api/getDevices", handlers.GetDevices)
 
 	// start server
 	fs := http.FileServer(http.Dir("../client/dist"))

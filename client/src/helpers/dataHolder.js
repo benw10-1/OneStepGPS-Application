@@ -3,26 +3,21 @@ import Dummy from "../dummy/data.json";
 import { apiStore } from "../stores";
 
 function Holder () {
-    let data = {};
+    let data = [];
     let updateFuncs = []
     const store = apiStore;
     // get data from API URL
     async function refresh() {
         try {
-            data = await Requests.getAPIData();
+            data = await Requests.getDevices();
         }
         catch (err) {
+            console.log(err)
             data = Dummy;
         }
-
-        data = data?.result_list ?? [];
-
-        for (const key in data) {
-            if (data[key]?.device_id) {
-                console.log(data[key].device_id);
-            }
-        }
-
+        data = data || Dummy;
+        data = data?.result_list ?? data ?? [];
+        // call all update functions with data
         for (const func of updateFuncs) {
             if (func) func(data);
         }
@@ -30,12 +25,15 @@ function Holder () {
 
         return data;
     }
-
+    // add update function
     function onUpdate(callback) {
+        if (typeof callback !== 'function') return -1
+        callback(data);
         updateFuncs.push(callback);
+
         return updateFuncs.length - 1;
     }
-
+    // remove update function
     function removeUpdate(callback) {
         if (typeof callback === 'number') {
             updateFuncs.splice(callback, 1);
@@ -45,9 +43,8 @@ function Holder () {
         }
     }
 
+    const interval = setInterval(refresh, 10000);
     refresh();
-
-    // const interval = setInterval(refresh, 10000);
 
     return {
         get: () => data,
@@ -55,7 +52,7 @@ function Holder () {
         onUpdate,
         removeUpdate,
         store,
-        // interval
+        interval
     }
 }
 

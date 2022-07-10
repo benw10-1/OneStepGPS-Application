@@ -67,21 +67,24 @@ export default {
     methods: {
         async login() {
             if (this.Name && this.Password) {
+                // reset error
                 this.Error = ''
                 let data = this.keySwitch ?
                     await Requests.setAPIKey(this.APIKey) :
                     (this.switch_ ?
                         await Requests.signup(this.Name, this.Password) :
                         await Requests.login(this.Name, this.Password))
+                // rerender with error if there is one
                 if (!data?.Token) {
                     this.Error = "Invalid username or password"
                     return
                 }
-
+                // need to set API key
                 if (!data.APIKey) this.keySwitch = true
             }
         },
         other() {
+            // switch between login and signup
             this.switch_ = !this.switch_
             this.Password = ''
             this.keySwitch = false
@@ -89,7 +92,6 @@ export default {
         setName(name) {
             const cleaned = name.replace(/[^a-zA-Z0-9]/g, '')
             this.Name = cleaned
-            this.$forceUpdate()
         },
         setPass(pass) {
             const cleaned = pass.replace(/[^a-zA-Z0-9!@#$%&]/g, '')
@@ -99,6 +101,7 @@ export default {
             const cleaned = key.trim()
             this.APIKey = cleaned
         },
+        // trigger rerender on resize
         resizer() {
             this.collapsed = window.innerWidth < 975
             this.small = window.innerWidth < 450

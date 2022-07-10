@@ -59,6 +59,6 @@ body {
 .container {
   height: 100%;
   width: 100%;
-  background-color: #fafafa;
+  background-color: #f5f5f5;
 }
 </style>

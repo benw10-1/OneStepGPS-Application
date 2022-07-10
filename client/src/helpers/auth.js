@@ -1,5 +1,5 @@
 import decode from "jwt-decode"
-
+// holds the user data
 export default {
     getProfile(token) {
         const tok = token ?? this.getToken()
@@ -32,7 +32,7 @@ export default {
         localStorage.setItem('id_token', idToken)
         if (this.onLogin) {
             const prof = this.getProfile(idToken)
-            console.log(prof)
+
             this.onLogin(prof)
         }
     },

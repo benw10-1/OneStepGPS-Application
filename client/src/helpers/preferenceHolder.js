@@ -38,7 +38,7 @@ function PrefHolder () {
         return data;
     }
 
-    set(Requests.getAPIData());
+    // set(Requests.getPreferences());
 
     return {
         get,

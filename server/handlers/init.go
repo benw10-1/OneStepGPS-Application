@@ -31,6 +31,8 @@ func Headers(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 }
+
+// Auth constructor
 func SignAuth(user *store.CleanUser) []byte {
 	token, err := auth.Sign(*user)
 	if err != nil {
@@ -171,6 +173,32 @@ func SetAPIKey(w http.ResponseWriter, r *http.Request) {
 	marshalled := SignAuth(edited)
 
 	w.Write(marshalled)
+}
+
+func GetDevices(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	Headers(w)
+	// guard clause
+	if r.Header.Get("Authorization") == "" || len(r.Header.Get("Authorization")) < 8 {
+		http.Error(w, "No authorization header", http.StatusUnauthorized)
+		return
+	}
+	// get token from header
+	token := r.Header.Get("Authorization")[7:]
+	// verify token and get user
+	user, err := auth.Validate(token)
+
+	if err != nil {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+	// get devices
+	devices := jsonStruct.GetDevices(user.Name)
+
+	w.Write([]byte(devices))
 }
 
 // Need to be logged in to view or alter preferences

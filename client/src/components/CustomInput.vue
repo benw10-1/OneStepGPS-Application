@@ -4,9 +4,7 @@
             <span>{{ required ? label + " *" : label }}</span>
         </div>
         <div class="input-relative">
-            <div class="input-container" v-on:mouseenter="entered_" v-on:mouseleave="left_" v-on:click="() => {
-            this.$refs.input.focus()
-        }">
+            <div class="input-container" v-on:mouseenter="entered_" v-on:mouseleave="left_" v-on:click="() => {this.$refs.input.focus()}">
             <input v-bind:type="type" v-bind:value="onChange ? value : value_"
                 v-on:input="(e) => { onChange_(e.currentTarget.value) }" v-bind:placeholder="placeholder"
                 v-bind:disabled="disabled" v-bind:autocorrect="autocomplete" v-bind:autocapitalize="autocomplete"
@@ -23,6 +21,7 @@
 <script>
 export default {
     name: 'CustomInput',
+    // generic input props + onChange for controlled input
     props: {
         value: {
             type: String,
@@ -138,6 +137,7 @@ export default {
         },
     },
     methods: {
+        // controlled input
         onChange_(data) {
             this.value_ = data
             if (this.required && !data) {
@@ -150,12 +150,14 @@ export default {
             }
             this.$forceUpdate()
         },
+        // focus triggered on blur and click
         focus_() {
             this.focused = true
         },
         unfocus_() {
             this.focused = false
         },
+        // trigger rerender when mouse enters or leaves visible div
         entered_() {
             this.hovered = true
         },
