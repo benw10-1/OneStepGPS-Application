@@ -49,9 +49,9 @@ body {
 
 #app {
   font-family: "Roboto", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  /* -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizeLegibility; */
   width: 100vw;
   height: 100vh;
 }

@@ -11,22 +11,17 @@
                 </div>
                 <div class="login-form-body" v-on:keydown="(e) => { if (e.key === 'Enter') login() }">
                     <div v-if="keySwitch" class="login-form-input">
-                        <input type="text" placeholder="API Key" v-model="APIKey"
-                            v-on:input="(e) => { setAPIKey(e.currentTarget.value) }" />
+                        <CustomInput placeholder="376529419055430ab4f3056b01e61fc6" label="API Key" :value="APIKey" :onChange="setAPIKey" :required="true" flexItem />
                     </div>
                     <div v-else class="login-form-input">
-                        <input type="text" placeholder="JohnDoe77" v-model="Name"
-                            v-on:input="(e) => { setName(e.currentTarget.value) }" />
-                        <input type="password" placeholder="Password" v-model="Password"
-                            v-on:input="(e) => { setPass(e.currentTarget.value) }" />
+                        <CustomInput placeholder="JohnDoe77" label="Username" :value="Name" :onChange="setName" :required="true" flexItem />
+                        <CustomInput placeholder="Password" label="Password" :value="Password" :onChange="setPass" :required="true" type="password" flexItem />
                     </div>
                     <div class="login-form-submit" v-if="!keySwitch">
                         <span v-on:click="other" class="login-form-switch">
                             {{ switch_ ? "Already have an account?" : "Don't have an account?" }}
                         </span>
-                        <button @click="login">
-                            {{ keySwitch ? "Submit" : (switch_ ? "Sign up" : "Log in") }}
-                        </button>
+                        <CustomButton padding="10px 14px" width="100px" :value="keySwitch ? 'Submit' : (switch_ ? 'SIGNUP' : 'LOGIN')" :onClick="login" />
                     </div>
                 </div>
             </div>
@@ -34,11 +29,21 @@
     </div>
 </template>
 
+<script setup>
+    document.title = "Login"
+</script>
+
 <script>
 import { Requests } from '../helpers'
+import CustomInput from "../components/CustomInput.vue"
+import CustomButton from "../components/CustomButton.vue"
 
 export default {
     name: 'LogIn',
+    components: {
+        CustomInput,
+        CustomButton
+    },
     props: {
     },
     data() {
@@ -84,6 +89,7 @@ export default {
         setName(name) {
             const cleaned = name.replace(/[^a-zA-Z0-9]/g, '')
             this.Name = cleaned
+            this.$forceUpdate()
         },
         setPass(pass) {
             const cleaned = pass.replace(/[^a-zA-Z0-9!@#$%&]/g, '')
@@ -112,8 +118,8 @@ export default {
 }
 
 .login-text {
-    margin-right: v-bind("collapsed ? '0' : '102px'");
-    margin-bottom: v-bind("collapsed ? '102px' : '0'");
+    margin: v-bind("collapsed ? '102px 16px' : '0 102px 0 0'");
+    text-align: v-bind("collapsed ? 'center' : 'left'");
 }
 
 .login-text h1,
@@ -124,6 +130,7 @@ export default {
     line-height: 1.235;
     letter-spacing: .0125em;
     color: rgb(25, 118, 210);
+    text-align: v-bind("collapsed ? 'center' : 'left'");
 }
 
 .login-text p {
@@ -141,7 +148,7 @@ export default {
     background-color: white;
     border-radius: 4px;
     position: relative;
-    height: 370px;
+    height: 315px;
     padding: 24px;
     display: flex;
     box-sizing: border-box;
@@ -161,5 +168,21 @@ export default {
     flex-direction: column;
     flex: 1;
     justify-content: center;
+}
+.login-form-submit {
+    display: flex;
+    flex-direction: row;
+    justify-content: v-bind("collapsed ? 'space-around' : 'flex-end'");
+    align-items: center;
+}
+.login-form-switch {
+    margin-right: v-bind("collapsed ? '0' : '16px'");
+    font-size: 1rem;
+    font-weight: 400;
+    /* line-height: 1.75; */
+    letter-spacing: .0125em;
+    color: #3366BB;
+    text-decoration: underline;
+    cursor: pointer;
 }
 </style>

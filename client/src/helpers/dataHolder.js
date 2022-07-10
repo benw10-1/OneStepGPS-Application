@@ -14,7 +14,15 @@ function Holder () {
         catch (err) {
             data = Dummy;
         }
+
         data = data?.result_list ?? [];
+
+        for (const key in data) {
+            if (data[key]?.device_id) {
+                console.log(data[key].device_id);
+            }
+        }
+
         for (const func of updateFuncs) {
             if (func) func(data);
         }
@@ -50,7 +58,5 @@ function Holder () {
         // interval
     }
 }
-
-export { Holder }
 
 export default Holder();

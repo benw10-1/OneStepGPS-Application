@@ -4,6 +4,10 @@
     </div>
 </template>
 
+<script setup>
+    document.title = "Dashboard"
+</script>
+
 <script>
 import SideBar from '../components/SideBar.vue'
 

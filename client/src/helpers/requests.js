@@ -1,6 +1,6 @@
 import { Auth } from ".";
-
-const API_URL = (key) => `https://track.onestepgps.com/v3/api/public/device?latest_point=true&api-key=${key}`;
+import Dummy from '../dummy/data.json';
+// const API_URL = (key) => `https://track.onestepgps.com/v3/api/public/device?latest_point=true&api-key=${key}`;
 const HOST_URL = 'http://localhost:3000/';
 
 async function base(url, override={}) {
@@ -59,8 +59,9 @@ async function signup(Name, Password) {
 async function getAPIData() {
     const key = Auth.getProfile().APIKey;
     if (!key) return Promise.reject('No API key');
-    const url = API_URL(key);
-    return base(url);
+    return Dummy;
+    // const url = API_URL(key);
+    // return base(url).then(data => data?.result_list);
 }
 
 async function setAPIKey(key) {
@@ -79,4 +80,19 @@ async function setAPIKey(key) {
     })
 }
 
-export default { getAPIData, base, login, signup, setAPIKey };
+async function getPreferences() {
+    const url = HOST_URL + 'api/preferences';
+
+    return base(url);
+}
+
+async function setPreferences(prefs) {
+    const url = HOST_URL + 'api/preferences';
+
+    return base(url, {
+        method: 'POST',
+        body: JSON.stringify(prefs)
+    });
+}
+
+export default { getAPIData, base, login, signup, setAPIKey, getPreferences, setPreferences };
