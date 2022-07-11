@@ -65,7 +65,24 @@ async function getDevices() {
 
     const url = HOST_URL + 'api/getDevices';
 
-    return base(url).then(data => data?.result_list ?? data);
+    return base(url).then(data => {
+        const devices = []
+        for (const device of data?.result_list ?? data ?? []) {
+            const formatted = {
+                device_id: device.device_id,
+                display_name: device.display_name,
+                online: device.online,
+                heading: device.heading ?? device.latest_device_point.angle,
+                lat: device.latest_device_point?.lat ?? device.lat,
+                lng: device.latest_device_point?.lng ?? device.lng,
+                drive_status: device.latest_device_point?.device_state?.drive_status ?? device.drive_status,
+                drive_status_begin_time: device.latest_device_point?.device_state?.drive_status_begin_time ?? device.drive_status_begin_time,
+            }
+            devices.push(formatted);
+        }
+        // console.log(devices);
+        return devices;
+    });
 }
 
 async function setAPIKey(key) {

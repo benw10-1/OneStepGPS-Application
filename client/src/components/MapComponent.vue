@@ -40,8 +40,13 @@ export default {
             colors: {
                 off: "rgba(255, 0, 0, .67)",
                 driving: "rgba(0, 255, 0, .67)",
-                idle: "rgba(255, 255, 0, .67)",
+                idle: "rgba(135, 206, 250, .67)",
+                offline: "rgba(218, 223, 225, 1)",
             },
+            settings: {
+                showLabels: true,
+                grouping: true
+            }
         }
     },
     methods: {
@@ -62,6 +67,7 @@ export default {
                 }
 
                 if (this.display.length && this.featureLayer) {
+                    this.featureLayer.clearLayers()
                     // remap all of our features to new devices
                     this.featureLayer.addData(this.display.map(device => ({
                         type: 'Feature',
@@ -77,16 +83,27 @@ export default {
                             drive_status: device.drive_status,
                             drive_status_begin_time: device.drive_status_begin_time,
                             heading: device.heading,
+                            online: device.online,
+                            lat: device.lat,
+                            lng: device.lng,
+                            color: device.online ? this.colors[device.drive_status] : this.colors['offline'],
                         }
                     })))
                 }
             }
         },
+        updateSettings(settings) {
+            this.settings = settings
+            this.updateDevices(this.devices)
+        },
         initMap() {
+            // view controls custom
             const map = L.map('map-target', {
                 // attributionControl: false,
-                // zoomControl: false,
+                zoomControl: false,
+                // renderer: L.canvas(),
             });
+
             // Open Street Map Tile Layer
             this.tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -113,9 +130,9 @@ export default {
                               <path 
                                 shape-rendering="optimizeQuality" 
                                 d="M 25 0 L 0 -10 L -25 0 L 0 -55 Z" 
-                                stroke="#808080" 
+                                stroke="#000000" 
                                 stroke-width="1" 
-                                fill="${this.colors[feature.properties.drive_status]}"
+                                fill="${feature.properties.color}"
                               />
                             </svg>
                         </div>`,
@@ -124,11 +141,15 @@ export default {
                         popupAnchor: [0, -20],
                     })
 
-                    return L.marker(latlng, {
+                    const marker = L.marker(latlng, {
                         icon: svgIcon,
                         // imported with leaflet-rotatedmarker
                         rotationAngle: feature.properties.heading,
                     })
+
+                    if (settings.showLabels) marker.bindTooltip(feature.properties.display_name).openTooltip()
+
+                    return marker
                 },
                 // on feature create
                 onEachFeature: (feature, layer) => {
@@ -138,15 +159,89 @@ export default {
                     })
                 }
             }).addTo(map);
-
+            // laod trigger
             map.on("load", () => {
                 setTimeout(() => {
                     map.invalidateSize()
                     this.loaded = true
+                    this.$emit("map-loaded", {
+                        moveCenter: this.moveCenter,
+
+                    })
                 }, 10)
                 this.map = map
             })
+            // add view controls
+            const parent = this
+            L.Control.ViewControls = L.Control.extend({
+                onAdd: function () {
+                    const container = L.DomUtil.create('div', 'view-controller');
 
+                    const zoomInButton = L.DomUtil.create('button', 'view-controller-button', container);
+                    const zoomIn = L.DomUtil.create('span', 'material-icons-outlined', zoomInButton);
+                    zoomIn.innerHTML = 'add';
+
+                    const zoomOutButton = L.DomUtil.create('button', 'view-controller-button', container);
+                    const zoomOut = L.DomUtil.create('span', 'material-icons-outlined', zoomOutButton);
+                    zoomOut.innerHTML = 'remove';
+
+                    const zoomOutMapButton = L.DomUtil.create('button', 'view-controller-button', container);
+                    const zoomOutMap = L.DomUtil.create('span', 'material-icons-outlined', zoomOutMapButton);
+                    zoomOutMap.innerHTML = 'zoom_out_map';
+
+                    L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
+                    L.DomEvent.on(container, 'click', L.DomEvent.preventDefault);
+
+                    L.DomEvent.on(zoomInButton, 'click', L.DomEvent.stopPropagation);
+                    L.DomEvent.on(zoomInButton, 'click', L.DomEvent.preventDefault);
+                    L.DomEvent.on(zoomInButton, 'click', () => {
+                        map.zoomIn();
+                    });
+
+                    L.DomEvent.on(zoomOutButton, 'click', L.DomEvent.stopPropagation);
+                    L.DomEvent.on(zoomOutButton, 'click', L.DomEvent.preventDefault);
+                    L.DomEvent.on(zoomOutButton, 'click', () => {
+                        map.zoomOut();
+                    });
+                    L.DomEvent.on(zoomOutMapButton, 'click', L.DomEvent.stopPropagation);
+                    L.DomEvent.on(zoomOutMapButton, 'click', L.DomEvent.preventDefault);
+                    L.DomEvent.on(zoomOutMapButton, 'click', () => map.fitBounds(parent.getDevicesView()));
+
+                    return container;
+                }
+            })
+
+            L.control.viewControls = function (options) {
+                return new L.Control.ViewControls(options);
+            }
+
+            L.Control.Settings = L.Control.extend({
+                onAdd: function () {
+                    const container = L.DomUtil.create('div', 'view-controller');
+
+                    const settingsButton = L.DomUtil.create('button', 'view-controller-button', container);
+                    const settings = L.DomUtil.create('span', 'material-icons', settingsButton);
+                    settings.innerHTML = 'settings';
+
+                    L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
+                    L.DomEvent.on(container, 'click', L.DomEvent.preventDefault);
+
+                    L.DomEvent.on(settingsButton, 'click', L.DomEvent.stopPropagation);
+                    L.DomEvent.on(settingsButton, 'click', L.DomEvent.preventDefault);
+                    L.DomEvent.on(settingsButton, 'click', () => {
+                        // map.zoomIn();
+                    });
+
+                    return container;
+                }
+            })
+
+            L.control.settings = function (options) {
+                return new L.Control.Settings(options);
+            }
+
+            L.control.settings({ position: 'topright' }).addTo(map);
+            L.control.viewControls({ position: 'topleft' }).addTo(map);
             // arbitrary default zoom level
             map.setView(this.center, 13)
         },
@@ -189,7 +284,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .map-container {
     flex: 1;
     height: 100%;
@@ -199,5 +294,34 @@ export default {
 #map-target {
     width: 100%;
     height: 100%;
+}
+
+.view-controller {
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    background-color: white;
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12);
+}
+
+.view-controller-button {
+    padding: 0.34rem;
+    width: 35px;
+    cursor: pointer;
+    outline: none;
+    border: none;
+    /* width: 30px; */
+    background-color: transparent;
+    color: #808080;
+    display: grid;
+    place-items: center;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.view-controller-button:hover {
+    background-color: #f5f5f5;
 }
 </style>

@@ -52,7 +52,7 @@ func (x *JSONStruct) GetDevices(name string) string {
 	// Get the user
 	for _, user := range x.GetUsers() {
 		if user.Name == name {
-			requestURL := "https://track.onestepgps.com/v3/api/public/device-info?state_detail=true&api-key=" + user.APIKey
+			requestURL := "https://track.onestepgps.com/v3/api/public/device?latest_point=true&api-key=" + user.APIKey
 
 			req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 			if err != nil {
