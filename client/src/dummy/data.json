@@ -1,89 +1,1464 @@
-[
-	{
-		"device_id": "6cIXo7bHNweEj-81f07--V",
-		"display_name": "Damian",
-		"factory_id": "4764206833",
-		"make": "calamp",
-		"model": "2630 HSPA",
-		"active_state": "active",
-		"lat": 34.035089299999996,
-		"lng": -118.32493919999999,
-		"heading": 145,
-		"dt_tracker": "2022-07-10T10:12:01Z",
-		"drive_status": "off",
-		"drive_status_duration_s": 3599,
-		"drive_status_distance_mi": 0.0018261478963149456,
-		"drive_status_distance_km": 0.002938901069272537,
-		"drive_status_begin_time": "2022-07-10T09:12:02Z",
-		"device_engine_hours": 9962913,
-		"acc": false,
-		"speed_mph": 0,
-		"speed_kph": 0,
-		"altitude_m": 28.49,
-		"num_satellites": 13,
-		"hdop": 0.800000011920929,
-		"vin": null,
-		"external_volt": 12.52400016784668,
-		"backup_battery_volt": 3.9800000190734863,
-		"odometer_mi": 51151.94539751587,
-		"odometer_km": 82321.10188199299
-	},
-	{
-		"device_id": "6cSC6kU-PmPrOk81f07-0-",
-		"display_name": "Alan",
-		"factory_id": "4764208234",
-		"make": "calamp",
-		"model": "2630 HSPA",
-		"active_state": "active",
-		"lat": 34.1567775,
-		"lng": -118.13930119999999,
-		"heading": 28,
-		"dt_tracker": "2022-07-10T10:14:05Z",
-		"drive_status": "off",
-		"drive_status_duration_s": 14399,
-		"drive_status_distance_mi": 0.007688109671332854,
-		"drive_status_distance_km": 0.012372816998754132,
-		"drive_status_begin_time": "2022-07-10T06:14:06Z",
-		"device_engine_hours": 0,
-		"acc": false,
-		"speed_mph": 0,
-		"speed_kph": 0,
-		"altitude_m": 251.58,
-		"num_satellites": 10,
-		"hdop": 1,
-		"vin": null,
-		"external_volt": 12.46399974822998,
-		"backup_battery_volt": 4.021999835968018,
-		"odometer_mi": 64553.52368206344,
-		"odometer_km": 103888.85815730608
-	},
-	{
-		"device_id": "6dW8V-27PRDWt-81f07-0-",
-		"display_name": "Bob",
-		"factory_id": "4572034343",
-		"make": "calamp",
-		"model": "3035 A LTE",
-		"active_state": "active",
-		"lat": 34.2400855,
-		"lng": -118.36651839999999,
-		"heading": 60,
-		"dt_tracker": "2021-07-03T00:17:07Z",
-		"drive_status": "off",
-		"drive_status_duration_s": 111,
-		"drive_status_distance_mi": 0,
-		"drive_status_distance_km": 0,
-		"drive_status_begin_time": "2021-07-03T00:15:16Z",
-		"device_engine_hours": 2334307,
-		"acc": false,
-		"speed_mph": 0,
-		"speed_kph": 0,
-		"altitude_m": 246.55,
-		"num_satellites": 15,
-		"hdop": 0.800000011920929,
-		"vin": "3FADP4BJ7CM129242",
-		"external_volt": 0,
-		"backup_battery_volt": 3.568000078201294,
-		"odometer_mi": 59892.086577,
-		"odometer_km": 96387
-	}
-]
+{
+	"result_list": [
+		{
+			"device_id": "6cIXo7bHNweEj-81f07--V",
+			"created_at": null,
+			"updated_at": "2022-07-11T09:27:38Z",
+			"activated_at": "2020-12-01T03:29:32.823521Z",
+			"delivered_at": null,
+			"factory_id": "4764206833",
+			"active_state": "active",
+			"display_name": "Damian",
+			"bcc_id": "",
+			"make": "calamp",
+			"model": "2630 HSPA",
+			"conn_type": "",
+			"conn_data": {
+				"calamp_next_lookup_time": null,
+				"calamp_ipr_omega_fee_paid": false
+			},
+			"data_node": "",
+			"settings": {
+				"begin_moving_speed": {
+					"value": 4.828024,
+					"unit": "km/h",
+					"display": "4.8 km/h"
+				},
+				"begin_stopped_speed": {
+					"value": 0,
+					"unit": "km/h",
+					"display": "0 km/h"
+				},
+				"max_drift_distance": {
+					"value": 350,
+					"unit": "m",
+					"display": "350 m"
+				},
+				"min_num_satellites": 6,
+				"max_hdop": 3.5,
+				"drive_timeout": {
+					"value": 1800,
+					"unit": "s",
+					"display": "30m"
+				},
+				"stop_timeout": {
+					"value": 14400,
+					"unit": "s",
+					"display": "4h"
+				},
+				"offline_timeout": {
+					"value": 3900,
+					"unit": "s",
+					"display": "1h 5m"
+				},
+				"history_calc_duration": {
+					"value": 86400,
+					"unit": "s",
+					"display": "24h"
+				}
+			},
+			"secondary_id": "",
+			"user_id_list": [
+				"6cA6PLzgODuZKk81f07--V",
+				"6cA6Q3FVO-DZKk81f07--V",
+				"6dTOETh3NZukO-81f07-0-",
+				"6dszt0R2NqXDfF81f07-0-",
+				"6eIT4OMsOf1Op-81f07-0-",
+				"6eIT4i_MPULOrk81f07-0-",
+				"6eIT4qzRQ59Os-81f07-0-",
+				"6eIT51nROEXOsk81f07-0-",
+				"6eIT5LigNOuOu-81f07-0-",
+				"6eIT5VboOkqOuV81f07-0-",
+				"6eIT5egBO7uOvV81f07-0-",
+				"6ewvnpp4Pje2rV81f07-0V",
+				"6fCSRfWwQ5iekV81f07--k",
+				"6fE0Xl_rO7Lwjk81f07-0-",
+				"6fRWeDMpP7eJhV81f07-0-",
+				"6fSu_NFEODLE5-81f07-0F",
+				"6fiPsAXBONDzWV81f07-0V",
+				"6forIm8ROiyo9F81f07-0V"
+			],
+			"online": true,
+			"latest_device_point": {
+				"device_point_id": "6h-IRiTLNcy5o-81f07-0V",
+				"dt_server": "2022-07-11T16:33:23.287815Z",
+				"dt_tracker": "2022-07-11T16:33:21Z",
+				"lat": 33.853548599999996,
+				"lng": -117.874169,
+				"altitude": 24.51,
+				"angle": 166,
+				"speed": 0,
+				"params": {
+					"acc": "0",
+					"gpslev": "11",
+					"hdop": "0.9",
+					"rssi": "-72",
+					"evtc": "30",
+					"acm12": "12494",
+					"acm13": "3978",
+					"acm0": "2400297335",
+					"acm1": "340349421",
+					"acm10": "0",
+					"acm11": "0",
+					"acm2": "3113482748",
+					"acm3": "0",
+					"acm5": "0",
+					"acm6": "0",
+					"acm7": "0",
+					"acm8": "0",
+					"acm9": "0",
+					"evti": "21",
+					"input1": "0",
+					"input2": "1",
+					"last_known_loc": "0",
+					"predicted_gps": "0",
+					"seq_num": "7799",
+					"service_type": "ack_request",
+					"valid_fix": "1"
+				},
+				"device_point_external": {
+					"posted_speed_limit": {},
+					"software_odometer_reading": {}
+				},
+				"device_point_detail": {
+					"factory_id": "4764206833",
+					"transmit_time": "2022-07-11T16:33:21Z",
+					"gps_time": "2022-07-11T16:33:21Z",
+					"acc": false,
+					"lat_lng": {
+						"lat": 33.853548599999996,
+						"lng": -117.874169
+					},
+					"altitude": {
+						"value": 24.51,
+						"unit": "m",
+						"display": "24.5 m"
+					},
+					"speed": {
+						"value": 0,
+						"unit": "km/h",
+						"display": "0 km/h"
+					},
+					"heading": 166,
+					"hdop": 0.90000004,
+					"num_satellites": 11,
+					"remote_addr": "",
+					"hevent_list": [
+						{
+							"hevent_type": "ignition_off"
+						}
+					],
+					"dtc_list": null,
+					"motion_log": {
+						"start_time": null,
+						"end_time": null,
+						"start_heading": null,
+						"end_heading": null,
+						"max_accelerating_force": {},
+						"max_decelerating_force": {},
+						"max_right_turn_force": {},
+						"max_left_turn_force": {}
+					},
+					"packet_sequence_id": "7799",
+					"rssi": -72,
+					"trip_distance": {},
+					"travel_distance": {},
+					"external_volt": 12.494,
+					"backup_battery_volt": 3.978,
+					"video_original_event": {
+						"hevent_type": ""
+					},
+					"calamp_service_type": "ack_request",
+					"remaining_battery_percent": null,
+					"historic": false,
+					"session_connected": true,
+					"diff_corrected": true,
+					"predicted": false,
+					"input_1_high": false,
+					"input_2_high": true,
+					"input_3_high": false,
+					"input_4_high": true,
+					"vbus_odometer": {},
+					"vbus_speed": {},
+					"vbus_engine_on": null,
+					"vbus_in_motion": null,
+					"fuel_percent": null,
+					"fuel_level_height": {},
+					"fuel_temp": {},
+					"eng_oil_temp": {},
+					"eng_hours_total": {},
+					"eng_hours_device_derived": {},
+					"trans_fluid_temp": {},
+					"eng_rpm": null,
+					"throttle_percent": null,
+					"coolant_temp": {},
+					"ambient_air_temp": {},
+					"vbus_avg_fuel_economy": {},
+					"barometric_pressure": {},
+					"vbus_calamp_indicators_0": null,
+					"vbus_calamp_indicators_1": null,
+					"vbus_fuel_flow": {},
+					"vbus_battery_volt": null,
+					"vbus_trip_fuel": {},
+					"vbus_fuel_usage": {},
+					"vbus_calculated_odometer": {},
+					"vbus_calculated_fuel_usage": {},
+					"vbus_inst_fuel_economy": {},
+					"vbus_dtc_count": null,
+					"throttle_valve_percent": null,
+					"vbus_engine_percent_torque": null,
+					"vbus_total_idle_hours": null,
+					"vbus_total_idle_fuel_used": {},
+					"seatbelt_fastened": null,
+					"can_get_seatbelt_fastened": null,
+					"change_oil_lamp_on": null
+				},
+				"device_state": {
+					"drive_status": "off",
+					"drive_status_id": "6h-IRiWlP9edcF81f07--k",
+					"drive_status_duration": {
+						"value": 0,
+						"unit": "s",
+						"display": "0s"
+					},
+					"drive_status_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"drive_status_lat_lng_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"drive_status_begin_time": "2022-07-11T16:33:21Z",
+					"best_distance_delta": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"is_new_drive_status": true,
+					"adjusted_lat_lng": {
+						"lat": 33.853548599999996,
+						"lng": -117.874169
+					},
+					"beyond_max_drift_distance": false,
+					"prev_drive_status": "idle",
+					"prev_drive_status_id": "6h-IRYoMPq9dUk81f07--k",
+					"prev_drive_status_duration": {
+						"value": 17,
+						"unit": "s",
+						"display": "17s"
+					},
+					"prev_drive_status_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"prev_drive_status_lat_lng_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"prev_drive_status_begin_time": "2022-07-11T16:33:04Z",
+					"prev_adjusted_lat_lng": {},
+					"inaccurate_per_device_settings": false,
+					"software_odometer": {},
+					"last_software_odometer_reading_time": null,
+					"hardware_odometer": {},
+					"odometer": {},
+					"debug_best_distance_strategy": "lat_lng_trip_invalid",
+					"debug_best_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"last_known_seatbelt_fastened": null
+				},
+				"device_state_stale": false,
+				"sequence": "2022-07-11 16:33:21.000000|2022-07-11 16:33:23.287815|6h-IRiTLNcy5o-81f07-0V"
+			},
+			"latest_accurate_device_point": {
+				"device_point_id": "6h-IRiTLNcy5o-81f07-0V",
+				"dt_server": "2022-07-11T16:33:23.287815Z",
+				"dt_tracker": "2022-07-11T16:33:21Z",
+				"lat": 33.853548599999996,
+				"lng": -117.874169,
+				"altitude": 24.51,
+				"angle": 166,
+				"speed": 0,
+				"params": {
+					"acc": "0",
+					"gpslev": "11",
+					"hdop": "0.9",
+					"rssi": "-72",
+					"evtc": "30",
+					"acm12": "12494",
+					"acm13": "3978",
+					"acm0": "2400297335",
+					"acm1": "340349421",
+					"acm10": "0",
+					"acm11": "0",
+					"acm2": "3113482748",
+					"acm3": "0",
+					"acm5": "0",
+					"acm6": "0",
+					"acm7": "0",
+					"acm8": "0",
+					"acm9": "0",
+					"evti": "21",
+					"input1": "0",
+					"input2": "1",
+					"last_known_loc": "0",
+					"predicted_gps": "0",
+					"seq_num": "7799",
+					"service_type": "ack_request",
+					"valid_fix": "1"
+				},
+				"device_point_external": {
+					"posted_speed_limit": {},
+					"software_odometer_reading": {}
+				},
+				"device_point_detail": {
+					"factory_id": "4764206833",
+					"transmit_time": "2022-07-11T16:33:21Z",
+					"gps_time": "2022-07-11T16:33:21Z",
+					"acc": false,
+					"lat_lng": {
+						"lat": 33.853548599999996,
+						"lng": -117.874169
+					},
+					"altitude": {
+						"value": 24.51,
+						"unit": "m",
+						"display": "24.5 m"
+					},
+					"speed": {
+						"value": 0,
+						"unit": "km/h",
+						"display": "0 km/h"
+					},
+					"heading": 166,
+					"hdop": 0.90000004,
+					"num_satellites": 11,
+					"remote_addr": "",
+					"hevent_list": [
+						{
+							"hevent_type": "ignition_off"
+						}
+					],
+					"dtc_list": null,
+					"motion_log": {
+						"start_time": null,
+						"end_time": null,
+						"start_heading": null,
+						"end_heading": null,
+						"max_accelerating_force": {},
+						"max_decelerating_force": {},
+						"max_right_turn_force": {},
+						"max_left_turn_force": {}
+					},
+					"packet_sequence_id": "7799",
+					"rssi": -72,
+					"trip_distance": {},
+					"travel_distance": {},
+					"external_volt": 12.494,
+					"backup_battery_volt": 3.978,
+					"video_original_event": {
+						"hevent_type": ""
+					},
+					"calamp_service_type": "ack_request",
+					"remaining_battery_percent": null,
+					"historic": false,
+					"session_connected": true,
+					"diff_corrected": true,
+					"predicted": false,
+					"input_1_high": false,
+					"input_2_high": true,
+					"input_3_high": false,
+					"input_4_high": true,
+					"vbus_odometer": {},
+					"vbus_speed": {},
+					"vbus_engine_on": null,
+					"vbus_in_motion": null,
+					"fuel_percent": null,
+					"fuel_level_height": {},
+					"fuel_temp": {},
+					"eng_oil_temp": {},
+					"eng_hours_total": {},
+					"eng_hours_device_derived": {},
+					"trans_fluid_temp": {},
+					"eng_rpm": null,
+					"throttle_percent": null,
+					"coolant_temp": {},
+					"ambient_air_temp": {},
+					"vbus_avg_fuel_economy": {},
+					"barometric_pressure": {},
+					"vbus_calamp_indicators_0": null,
+					"vbus_calamp_indicators_1": null,
+					"vbus_fuel_flow": {},
+					"vbus_battery_volt": null,
+					"vbus_trip_fuel": {},
+					"vbus_fuel_usage": {},
+					"vbus_calculated_odometer": {},
+					"vbus_calculated_fuel_usage": {},
+					"vbus_inst_fuel_economy": {},
+					"vbus_dtc_count": null,
+					"throttle_valve_percent": null,
+					"vbus_engine_percent_torque": null,
+					"vbus_total_idle_hours": null,
+					"vbus_total_idle_fuel_used": {},
+					"seatbelt_fastened": null,
+					"can_get_seatbelt_fastened": null,
+					"change_oil_lamp_on": null
+				},
+				"device_state": {
+					"drive_status": "off",
+					"drive_status_id": "6h-IRiWlP9edcF81f07--k",
+					"drive_status_duration": {
+						"value": 0,
+						"unit": "s",
+						"display": "0s"
+					},
+					"drive_status_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"drive_status_lat_lng_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"drive_status_begin_time": "2022-07-11T16:33:21Z",
+					"best_distance_delta": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"is_new_drive_status": true,
+					"adjusted_lat_lng": {
+						"lat": 33.853548599999996,
+						"lng": -117.874169
+					},
+					"beyond_max_drift_distance": false,
+					"prev_drive_status": "idle",
+					"prev_drive_status_id": "6h-IRYoMPq9dUk81f07--k",
+					"prev_drive_status_duration": {
+						"value": 17,
+						"unit": "s",
+						"display": "17s"
+					},
+					"prev_drive_status_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"prev_drive_status_lat_lng_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"prev_drive_status_begin_time": "2022-07-11T16:33:04Z",
+					"prev_adjusted_lat_lng": {},
+					"inaccurate_per_device_settings": false,
+					"software_odometer": {},
+					"last_software_odometer_reading_time": null,
+					"hardware_odometer": {},
+					"odometer": {},
+					"debug_best_distance_strategy": "lat_lng_trip_invalid",
+					"debug_best_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"last_known_seatbelt_fastened": null
+				},
+				"device_state_stale": false,
+				"sequence": "2022-07-11 16:33:21.000000|2022-07-11 16:33:23.287815|6h-IRiTLNcy5o-81f07-0V"
+			},
+			"device_groups_id_list": null,
+			"device_field_list": null,
+			"device_ui_settings": {}
+		},
+		{
+			"device_id": "6cSC6kU-PmPrOk81f07-0-",
+			"created_at": null,
+			"updated_at": "2022-07-11T08:24:55Z",
+			"activated_at": null,
+			"delivered_at": null,
+			"factory_id": "4764208234",
+			"active_state": "active",
+			"display_name": "Alan",
+			"bcc_id": "",
+			"make": "calamp",
+			"model": "2630 HSPA",
+			"conn_type": "",
+			"conn_data": {
+				"calamp_next_lookup_time": null,
+				"calamp_ipr_omega_fee_paid": false
+			},
+			"data_node": "",
+			"settings": {
+				"begin_moving_speed": {
+					"value": 4.828024,
+					"unit": "km/h",
+					"display": "4.8 km/h"
+				},
+				"begin_stopped_speed": {
+					"value": 0,
+					"unit": "km/h",
+					"display": "0 km/h"
+				},
+				"max_drift_distance": {
+					"value": 350,
+					"unit": "m",
+					"display": "350 m"
+				},
+				"min_num_satellites": 6,
+				"max_hdop": 3.5,
+				"drive_timeout": {
+					"value": 1800,
+					"unit": "s",
+					"display": "30m"
+				},
+				"stop_timeout": {
+					"value": 14400,
+					"unit": "s",
+					"display": "4h"
+				},
+				"offline_timeout": {
+					"value": 3900,
+					"unit": "s",
+					"display": "1h 5m"
+				},
+				"history_calc_duration": {
+					"value": 86400,
+					"unit": "s",
+					"display": "24h"
+				}
+			},
+			"secondary_id": "",
+			"user_id_list": [
+				"6cA6PLzgODuZKk81f07--V",
+				"6cA6Q3FVO-DZKk81f07--V",
+				"6cpWTQVQOpTySF81f07-0-",
+				"6cpWTQnMPLXySF81f07-0-",
+				"6dTOETh3NZukO-81f07-0-",
+				"6dszt0R2NqXDfF81f07-0-",
+				"6eHH_Gn2O3iaU-81f07-0F",
+				"6eIT4OMsOf1Op-81f07-0-",
+				"6eIT4i_MPULOrk81f07-0-",
+				"6eIT4qzRQ59Os-81f07-0-",
+				"6eIT51nROEXOsk81f07-0-",
+				"6eIT5LigNOuOu-81f07-0-",
+				"6eIT5VboOkqOuV81f07-0-",
+				"6eIT5egBO7uOvV81f07-0-",
+				"6ewvnpp4Pje2rV81f07-0V",
+				"6fCSRfWwQ5iekV81f07--k",
+				"6fE0Xl_rO7Lwjk81f07-0-",
+				"6fRWeDMpP7eJhV81f07-0-",
+				"6fSu_NFEODLE5-81f07-0F",
+				"6fiPsAXBONDzWV81f07-0V",
+				"6forIm8ROiyo9F81f07-0V"
+			],
+			"online": true,
+			"latest_device_point": {
+				"device_point_id": "6h-IMzaWQmmYVk81f07-0V",
+				"dt_server": "2022-07-11T16:24:55.151502Z",
+				"dt_tracker": "2022-07-11T16:24:52Z",
+				"lat": 34.156792599999996,
+				"lng": -118.139316,
+				"altitude": 250.25,
+				"angle": 88,
+				"speed": 0,
+				"params": {
+					"acc": "0",
+					"gpslev": "11",
+					"hdop": "0.8",
+					"rssi": "-92",
+					"evtc": "2",
+					"acm12": "12372",
+					"acm13": "4022",
+					"acm0": "228131228",
+					"acm1": "341372720",
+					"acm10": "0",
+					"acm11": "0",
+					"acm2": "3113406063",
+					"acm3": "0",
+					"acm5": "0",
+					"acm6": "0",
+					"acm7": "0",
+					"acm8": "0",
+					"acm9": "0",
+					"evti": "37",
+					"input1": "0",
+					"input2": "1",
+					"last_known_loc": "0",
+					"predicted_gps": "0",
+					"seq_num": "5714",
+					"service_type": "ack_request",
+					"valid_fix": "1"
+				},
+				"device_point_external": {
+					"posted_speed_limit": {},
+					"software_odometer_reading": {}
+				},
+				"device_point_detail": {
+					"factory_id": "4764208234",
+					"transmit_time": "2022-07-11T16:24:53Z",
+					"gps_time": "2022-07-11T16:24:52Z",
+					"acc": false,
+					"lat_lng": {
+						"lat": 34.156792599999996,
+						"lng": -118.139316
+					},
+					"altitude": {
+						"value": 250.25,
+						"unit": "m",
+						"display": "250.2 m"
+					},
+					"speed": {
+						"value": 0,
+						"unit": "km/h",
+						"display": "0 km/h"
+					},
+					"heading": 88,
+					"hdop": 0.8,
+					"num_satellites": 11,
+					"remote_addr": "",
+					"hevent_list": null,
+					"dtc_list": null,
+					"motion_log": {
+						"start_time": null,
+						"end_time": null,
+						"start_heading": null,
+						"end_heading": null,
+						"max_accelerating_force": {},
+						"max_decelerating_force": {},
+						"max_right_turn_force": {},
+						"max_left_turn_force": {}
+					},
+					"packet_sequence_id": "5714",
+					"rssi": -92,
+					"trip_distance": {},
+					"travel_distance": {},
+					"external_volt": 12.372,
+					"backup_battery_volt": 4.022,
+					"video_original_event": {
+						"hevent_type": ""
+					},
+					"calamp_service_type": "ack_request",
+					"remaining_battery_percent": null,
+					"historic": false,
+					"session_connected": true,
+					"diff_corrected": true,
+					"predicted": false,
+					"input_1_high": false,
+					"input_2_high": true,
+					"input_3_high": false,
+					"input_4_high": true,
+					"vbus_odometer": {},
+					"vbus_speed": {},
+					"vbus_engine_on": null,
+					"vbus_in_motion": null,
+					"fuel_percent": null,
+					"fuel_level_height": {},
+					"fuel_temp": {},
+					"eng_oil_temp": {},
+					"eng_hours_total": {},
+					"eng_hours_device_derived": {},
+					"trans_fluid_temp": {},
+					"eng_rpm": null,
+					"throttle_percent": null,
+					"coolant_temp": {},
+					"ambient_air_temp": {},
+					"vbus_avg_fuel_economy": {},
+					"barometric_pressure": {},
+					"vbus_calamp_indicators_0": null,
+					"vbus_calamp_indicators_1": null,
+					"vbus_fuel_flow": {},
+					"vbus_battery_volt": null,
+					"vbus_trip_fuel": {},
+					"vbus_fuel_usage": {},
+					"vbus_calculated_odometer": {},
+					"vbus_calculated_fuel_usage": {},
+					"vbus_inst_fuel_economy": {},
+					"vbus_dtc_count": null,
+					"throttle_valve_percent": null,
+					"vbus_engine_percent_torque": null,
+					"vbus_total_idle_hours": null,
+					"vbus_total_idle_fuel_used": {},
+					"seatbelt_fastened": null,
+					"can_get_seatbelt_fastened": null,
+					"change_oil_lamp_on": null
+				},
+				"device_state": {
+					"drive_status": "off",
+					"drive_status_id": "6h-9CF_cOg1im-81f07--k",
+					"drive_status_duration": {
+						"value": 62999,
+						"unit": "s",
+						"display": "17h 29m 59s"
+					},
+					"drive_status_distance": {
+						"value": 4.727178397080816,
+						"unit": "m",
+						"display": "4.7 m"
+					},
+					"drive_status_lat_lng_distance": {
+						"value": 4.727178397080816,
+						"unit": "m",
+						"display": "4.7 m"
+					},
+					"drive_status_begin_time": "2022-07-10T22:54:53Z",
+					"best_distance_delta": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"is_new_drive_status": false,
+					"adjusted_lat_lng": {
+						"lat": 34.1567891,
+						"lng": -118.1393672
+					},
+					"beyond_max_drift_distance": false,
+					"prev_drive_status_duration": {},
+					"prev_drive_status_distance": {},
+					"prev_drive_status_lat_lng_distance": {},
+					"prev_drive_status_begin_time": null,
+					"prev_adjusted_lat_lng": {},
+					"inaccurate_per_device_settings": false,
+					"software_odometer": {
+						"value": 103895.707397047,
+						"unit": "km",
+						"display": "103895.7 km"
+					},
+					"last_software_odometer_reading_time": "2022-07-11T11:54:52Z",
+					"hardware_odometer": {},
+					"odometer": {
+						"value": 103895.707397047,
+						"unit": "km",
+						"display": "103895.7 km"
+					},
+					"debug_best_distance_strategy": "lat_lng_trip_invalid",
+					"debug_best_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"last_known_seatbelt_fastened": null
+				},
+				"device_state_stale": false,
+				"sequence": "2022-07-11 16:24:52.000000|2022-07-11 16:24:55.151502|6h-IMzaWQmmYVk81f07-0V"
+			},
+			"latest_accurate_device_point": {
+				"device_point_id": "6h-IMzaWQmmYVk81f07-0V",
+				"dt_server": "2022-07-11T16:24:55.151502Z",
+				"dt_tracker": "2022-07-11T16:24:52Z",
+				"lat": 34.156792599999996,
+				"lng": -118.139316,
+				"altitude": 250.25,
+				"angle": 88,
+				"speed": 0,
+				"params": {
+					"acc": "0",
+					"gpslev": "11",
+					"hdop": "0.8",
+					"rssi": "-92",
+					"evtc": "2",
+					"acm12": "12372",
+					"acm13": "4022",
+					"acm0": "228131228",
+					"acm1": "341372720",
+					"acm10": "0",
+					"acm11": "0",
+					"acm2": "3113406063",
+					"acm3": "0",
+					"acm5": "0",
+					"acm6": "0",
+					"acm7": "0",
+					"acm8": "0",
+					"acm9": "0",
+					"evti": "37",
+					"input1": "0",
+					"input2": "1",
+					"last_known_loc": "0",
+					"predicted_gps": "0",
+					"seq_num": "5714",
+					"service_type": "ack_request",
+					"valid_fix": "1"
+				},
+				"device_point_external": {
+					"posted_speed_limit": {},
+					"software_odometer_reading": {}
+				},
+				"device_point_detail": {
+					"factory_id": "4764208234",
+					"transmit_time": "2022-07-11T16:24:53Z",
+					"gps_time": "2022-07-11T16:24:52Z",
+					"acc": false,
+					"lat_lng": {
+						"lat": 34.156792599999996,
+						"lng": -118.139316
+					},
+					"altitude": {
+						"value": 250.25,
+						"unit": "m",
+						"display": "250.2 m"
+					},
+					"speed": {
+						"value": 0,
+						"unit": "km/h",
+						"display": "0 km/h"
+					},
+					"heading": 88,
+					"hdop": 0.8,
+					"num_satellites": 11,
+					"remote_addr": "",
+					"hevent_list": null,
+					"dtc_list": null,
+					"motion_log": {
+						"start_time": null,
+						"end_time": null,
+						"start_heading": null,
+						"end_heading": null,
+						"max_accelerating_force": {},
+						"max_decelerating_force": {},
+						"max_right_turn_force": {},
+						"max_left_turn_force": {}
+					},
+					"packet_sequence_id": "5714",
+					"rssi": -92,
+					"trip_distance": {},
+					"travel_distance": {},
+					"external_volt": 12.372,
+					"backup_battery_volt": 4.022,
+					"video_original_event": {
+						"hevent_type": ""
+					},
+					"calamp_service_type": "ack_request",
+					"remaining_battery_percent": null,
+					"historic": false,
+					"session_connected": true,
+					"diff_corrected": true,
+					"predicted": false,
+					"input_1_high": false,
+					"input_2_high": true,
+					"input_3_high": false,
+					"input_4_high": true,
+					"vbus_odometer": {},
+					"vbus_speed": {},
+					"vbus_engine_on": null,
+					"vbus_in_motion": null,
+					"fuel_percent": null,
+					"fuel_level_height": {},
+					"fuel_temp": {},
+					"eng_oil_temp": {},
+					"eng_hours_total": {},
+					"eng_hours_device_derived": {},
+					"trans_fluid_temp": {},
+					"eng_rpm": null,
+					"throttle_percent": null,
+					"coolant_temp": {},
+					"ambient_air_temp": {},
+					"vbus_avg_fuel_economy": {},
+					"barometric_pressure": {},
+					"vbus_calamp_indicators_0": null,
+					"vbus_calamp_indicators_1": null,
+					"vbus_fuel_flow": {},
+					"vbus_battery_volt": null,
+					"vbus_trip_fuel": {},
+					"vbus_fuel_usage": {},
+					"vbus_calculated_odometer": {},
+					"vbus_calculated_fuel_usage": {},
+					"vbus_inst_fuel_economy": {},
+					"vbus_dtc_count": null,
+					"throttle_valve_percent": null,
+					"vbus_engine_percent_torque": null,
+					"vbus_total_idle_hours": null,
+					"vbus_total_idle_fuel_used": {},
+					"seatbelt_fastened": null,
+					"can_get_seatbelt_fastened": null,
+					"change_oil_lamp_on": null
+				},
+				"device_state": {
+					"drive_status": "off",
+					"drive_status_id": "6h-9CF_cOg1im-81f07--k",
+					"drive_status_duration": {
+						"value": 62999,
+						"unit": "s",
+						"display": "17h 29m 59s"
+					},
+					"drive_status_distance": {
+						"value": 4.727178397080816,
+						"unit": "m",
+						"display": "4.7 m"
+					},
+					"drive_status_lat_lng_distance": {
+						"value": 4.727178397080816,
+						"unit": "m",
+						"display": "4.7 m"
+					},
+					"drive_status_begin_time": "2022-07-10T22:54:53Z",
+					"best_distance_delta": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"is_new_drive_status": false,
+					"adjusted_lat_lng": {
+						"lat": 34.1567891,
+						"lng": -118.1393672
+					},
+					"beyond_max_drift_distance": false,
+					"prev_drive_status_duration": {},
+					"prev_drive_status_distance": {},
+					"prev_drive_status_lat_lng_distance": {},
+					"prev_drive_status_begin_time": null,
+					"prev_adjusted_lat_lng": {},
+					"inaccurate_per_device_settings": false,
+					"software_odometer": {
+						"value": 103895.707397047,
+						"unit": "km",
+						"display": "103895.7 km"
+					},
+					"last_software_odometer_reading_time": "2022-07-11T11:54:52Z",
+					"hardware_odometer": {},
+					"odometer": {
+						"value": 103895.707397047,
+						"unit": "km",
+						"display": "103895.7 km"
+					},
+					"debug_best_distance_strategy": "lat_lng_trip_invalid",
+					"debug_best_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"last_known_seatbelt_fastened": null
+				},
+				"device_state_stale": false,
+				"sequence": "2022-07-11 16:24:52.000000|2022-07-11 16:24:55.151502|6h-IMzaWQmmYVk81f07-0V"
+			},
+			"device_groups_id_list": null,
+			"device_field_list": null,
+			"device_ui_settings": {}
+		},
+		{
+			"device_id": "6dW8V-27PRDWt-81f07-0-",
+			"created_at": "2019-06-01T18:06:38Z",
+			"updated_at": "2022-05-18T04:33:23Z",
+			"activated_at": "2019-10-04T16:20:18.951954Z",
+			"delivered_at": null,
+			"factory_id": "4572034343",
+			"active_state": "active",
+			"display_name": "Bob",
+			"bcc_id": "",
+			"make": "calamp",
+			"model": "3035 A LTE",
+			"conn_type": "",
+			"conn_data": {
+				"calamp_next_lookup_time": null,
+				"calamp_ipr_omega_fee_paid": false
+			},
+			"data_node": "",
+			"settings": {
+				"begin_moving_speed": {
+					"value": 3,
+					"unit": "km/h",
+					"display": "3 km/h"
+				},
+				"begin_stopped_speed": {
+					"value": 0,
+					"unit": "km/h",
+					"display": "0 km/h"
+				},
+				"max_drift_distance": {},
+				"min_num_satellites": 5,
+				"max_hdop": 3,
+				"drive_timeout": {},
+				"stop_timeout": {},
+				"offline_timeout": {},
+				"history_calc_duration": {},
+				"calamp_odom_accumulator": "acm15",
+				"calamp_vbus_detection_bitfield": 95
+			},
+			"secondary_id": "",
+			"user_id_list": [
+				"6cA6PLutNqPZKk81f07--V",
+				"6cA6Q3FVO-DZKk81f07--V",
+				"6eHGCAwROZDIo-81f07-0-",
+				"6eHH_Gn2O3iaU-81f07-0F",
+				"6eIT4OMsOf1Op-81f07-0-",
+				"6eIT4i_MPULOrk81f07-0-",
+				"6eIT4qzRQ59Os-81f07-0-",
+				"6eIT51nROEXOsk81f07-0-",
+				"6eIT5LigNOuOu-81f07-0-",
+				"6eIT5VboOkqOuV81f07-0-",
+				"6eIT5egBO7uOvV81f07-0-",
+				"6fCSRfWwQ5iekV81f07--k",
+				"6fE0Xl_rO7Lwjk81f07-0-",
+				"6fRWeDMpP7eJhV81f07-0-",
+				"6fiPsAXBONDzWV81f07-0V",
+				"6forIm8ROiyo9F81f07-0V"
+			],
+			"online": false,
+			"latest_device_point": {
+				"device_point_id": "6fqtF-QDPVyrSk81f07-0V",
+				"dt_server": "2021-07-03T00:17:07.369967Z",
+				"dt_tracker": "2021-07-03T00:17:07Z",
+				"lat": 34.2400855,
+				"lng": -118.36651839999999,
+				"altitude": 246.55,
+				"angle": 60,
+				"speed": 0,
+				"params": {
+					"acc": "0",
+					"gpslev": "15",
+					"hdop": "0.8",
+					"rssi": "-69",
+					"evtc": "40",
+					"acm12": "0",
+					"acm13": "3568",
+					"acm0": "2333180260",
+					"acm1": "341418620",
+					"acm10": "2",
+					"acm11": "0",
+					"acm15": "96387000",
+					"acm16": "0",
+					"acm17": "0",
+					"acm18": "0",
+					"acm19": "0",
+					"acm2": "3113409120",
+					"acm20": "0",
+					"acm22": "0",
+					"acm23": "0",
+					"acm24": "190",
+					"acm25": "0",
+					"acm26": "0",
+					"acm27": "0",
+					"acm28": "1440",
+					"acm29": "576",
+					"acm3": "0",
+					"acm5": "0",
+					"acm6": "0",
+					"acm7": "0",
+					"acm8": "0",
+					"acm9": "97",
+					"evti": "7",
+					"input1": "1",
+					"input2": "1",
+					"last_known_loc": "0",
+					"seq_num": "10209",
+					"service_type": "ack_request",
+					"valid_fix": "1"
+				},
+				"device_point_external": {
+					"posted_speed_limit": {},
+					"software_odometer_reading": {}
+				},
+				"device_point_detail": {
+					"factory_id": "4572034343",
+					"transmit_time": "2021-07-03T00:17:07Z",
+					"gps_time": "2021-07-03T00:17:07Z",
+					"acc": false,
+					"lat_lng": {
+						"lat": 34.2400855,
+						"lng": -118.36651839999999
+					},
+					"altitude": {
+						"value": 246.55,
+						"unit": "m",
+						"display": "246.6 m"
+					},
+					"speed": {
+						"value": 0,
+						"unit": "km/h",
+						"display": "0 km/h"
+					},
+					"heading": 60,
+					"hdop": 0.8,
+					"num_satellites": 15,
+					"remote_addr": "",
+					"hevent_list": [
+						{
+							"hevent_type": "pwrcut"
+						}
+					],
+					"dtc_list": null,
+					"motion_log": {
+						"start_time": null,
+						"end_time": null,
+						"start_heading": null,
+						"end_heading": null,
+						"max_accelerating_force": {},
+						"max_decelerating_force": {},
+						"max_right_turn_force": {},
+						"max_left_turn_force": {}
+					},
+					"packet_sequence_id": "10209",
+					"rssi": -69,
+					"trip_distance": {},
+					"travel_distance": {},
+					"external_volt": 0,
+					"backup_battery_volt": 3.568,
+					"video_original_event": {
+						"hevent_type": ""
+					},
+					"calamp_service_type": "ack_request",
+					"remaining_battery_percent": null,
+					"historic": false,
+					"session_connected": true,
+					"diff_corrected": true,
+					"predicted": false,
+					"input_1_high": true,
+					"input_2_high": true,
+					"input_3_high": false,
+					"input_4_high": false,
+					"vbus_odometer": {
+						"value": 96387000,
+						"unit": "m",
+						"display": "96387000 m"
+					},
+					"vbus_speed": {},
+					"vbus_engine_on": null,
+					"vbus_in_motion": null,
+					"fuel_percent": null,
+					"fuel_level_height": {},
+					"fuel_temp": {},
+					"eng_oil_temp": {},
+					"eng_hours_total": {},
+					"eng_hours_device_derived": {},
+					"trans_fluid_temp": {},
+					"eng_rpm": null,
+					"throttle_percent": null,
+					"coolant_temp": {
+						"value": 90,
+						"unit": "c",
+						"display": "90 c"
+					},
+					"ambient_air_temp": {
+						"value": 36,
+						"unit": "c",
+						"display": "36 c"
+					},
+					"vbus_avg_fuel_economy": {
+						"value": 19,
+						"unit": "km/l",
+						"display": "19 km/l"
+					},
+					"barometric_pressure": {
+						"value": 97,
+						"unit": "kpa",
+						"display": "97 kpa"
+					},
+					"vbus_calamp_indicators_0": null,
+					"vbus_calamp_indicators_1": null,
+					"vbus_fuel_flow": {},
+					"vbus_battery_volt": null,
+					"vbus_trip_fuel": {},
+					"vbus_fuel_usage": {},
+					"vbus_calculated_odometer": {},
+					"vbus_calculated_fuel_usage": {},
+					"vbus_inst_fuel_economy": {},
+					"vbus_dtc_count": null,
+					"throttle_valve_percent": null,
+					"vbus_engine_percent_torque": null,
+					"vbus_total_idle_hours": null,
+					"vbus_total_idle_fuel_used": {},
+					"seatbelt_fastened": null,
+					"can_get_seatbelt_fastened": null,
+					"change_oil_lamp_on": null
+				},
+				"device_state": {
+					"drive_status": "off",
+					"drive_status_id": "6fqtDzAaOjygoV81f07-0V",
+					"drive_status_duration": {
+						"value": 111,
+						"unit": "s",
+						"display": "1m 51s"
+					},
+					"drive_status_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"drive_status_lat_lng_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"drive_status_begin_time": "2021-07-03T00:15:16Z",
+					"best_distance_delta": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"is_new_drive_status": false,
+					"adjusted_lat_lng": {
+						"lat": 34.2400855,
+						"lng": -118.36651839999999
+					},
+					"beyond_max_drift_distance": false,
+					"prev_drive_status_duration": {},
+					"prev_drive_status_distance": {},
+					"prev_drive_status_lat_lng_distance": {},
+					"prev_drive_status_begin_time": null,
+					"prev_adjusted_lat_lng": {},
+					"inaccurate_per_device_settings": false,
+					"software_odometer": {},
+					"last_software_odometer_reading_time": null,
+					"hardware_odometer": {
+						"value": 96387000,
+						"unit": "m",
+						"display": "96387000 m"
+					},
+					"odometer": {
+						"value": 96387000,
+						"unit": "m",
+						"display": "96387000 m"
+					},
+					"debug_best_distance_strategy": "lat_lng_trip_invalid",
+					"debug_best_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"last_known_seatbelt_fastened": null
+				},
+				"device_state_stale": false,
+				"sequence": "2021-07-03 00:17:07.000000|2021-07-03 00:17:07.369967|6fqtF-QDPVyrSk81f07-0V"
+			},
+			"latest_accurate_device_point": {
+				"device_point_id": "6fqtF-QDPVyrSk81f07-0V",
+				"dt_server": "2021-07-03T00:17:07.369967Z",
+				"dt_tracker": "2021-07-03T00:17:07Z",
+				"lat": 34.2400855,
+				"lng": -118.36651839999999,
+				"altitude": 246.55,
+				"angle": 60,
+				"speed": 0,
+				"params": {
+					"acc": "0",
+					"gpslev": "15",
+					"hdop": "0.8",
+					"rssi": "-69",
+					"evtc": "40",
+					"acm12": "0",
+					"acm13": "3568",
+					"acm0": "2333180260",
+					"acm1": "341418620",
+					"acm10": "2",
+					"acm11": "0",
+					"acm15": "96387000",
+					"acm16": "0",
+					"acm17": "0",
+					"acm18": "0",
+					"acm19": "0",
+					"acm2": "3113409120",
+					"acm20": "0",
+					"acm22": "0",
+					"acm23": "0",
+					"acm24": "190",
+					"acm25": "0",
+					"acm26": "0",
+					"acm27": "0",
+					"acm28": "1440",
+					"acm29": "576",
+					"acm3": "0",
+					"acm5": "0",
+					"acm6": "0",
+					"acm7": "0",
+					"acm8": "0",
+					"acm9": "97",
+					"evti": "7",
+					"input1": "1",
+					"input2": "1",
+					"last_known_loc": "0",
+					"seq_num": "10209",
+					"service_type": "ack_request",
+					"valid_fix": "1"
+				},
+				"device_point_external": {
+					"posted_speed_limit": {},
+					"software_odometer_reading": {}
+				},
+				"device_point_detail": {
+					"factory_id": "4572034343",
+					"transmit_time": "2021-07-03T00:17:07Z",
+					"gps_time": "2021-07-03T00:17:07Z",
+					"acc": false,
+					"lat_lng": {
+						"lat": 34.2400855,
+						"lng": -118.36651839999999
+					},
+					"altitude": {
+						"value": 246.55,
+						"unit": "m",
+						"display": "246.6 m"
+					},
+					"speed": {
+						"value": 0,
+						"unit": "km/h",
+						"display": "0 km/h"
+					},
+					"heading": 60,
+					"hdop": 0.8,
+					"num_satellites": 15,
+					"remote_addr": "",
+					"hevent_list": [
+						{
+							"hevent_type": "pwrcut"
+						}
+					],
+					"dtc_list": null,
+					"motion_log": {
+						"start_time": null,
+						"end_time": null,
+						"start_heading": null,
+						"end_heading": null,
+						"max_accelerating_force": {},
+						"max_decelerating_force": {},
+						"max_right_turn_force": {},
+						"max_left_turn_force": {}
+					},
+					"packet_sequence_id": "10209",
+					"rssi": -69,
+					"trip_distance": {},
+					"travel_distance": {},
+					"external_volt": 0,
+					"backup_battery_volt": 3.568,
+					"video_original_event": {
+						"hevent_type": ""
+					},
+					"calamp_service_type": "ack_request",
+					"remaining_battery_percent": null,
+					"historic": false,
+					"session_connected": true,
+					"diff_corrected": true,
+					"predicted": false,
+					"input_1_high": true,
+					"input_2_high": true,
+					"input_3_high": false,
+					"input_4_high": false,
+					"vbus_odometer": {
+						"value": 96387000,
+						"unit": "m",
+						"display": "96387000 m"
+					},
+					"vbus_speed": {},
+					"vbus_engine_on": null,
+					"vbus_in_motion": null,
+					"fuel_percent": null,
+					"fuel_level_height": {},
+					"fuel_temp": {},
+					"eng_oil_temp": {},
+					"eng_hours_total": {},
+					"eng_hours_device_derived": {},
+					"trans_fluid_temp": {},
+					"eng_rpm": null,
+					"throttle_percent": null,
+					"coolant_temp": {
+						"value": 90,
+						"unit": "c",
+						"display": "90 c"
+					},
+					"ambient_air_temp": {
+						"value": 36,
+						"unit": "c",
+						"display": "36 c"
+					},
+					"vbus_avg_fuel_economy": {
+						"value": 19,
+						"unit": "km/l",
+						"display": "19 km/l"
+					},
+					"barometric_pressure": {
+						"value": 97,
+						"unit": "kpa",
+						"display": "97 kpa"
+					},
+					"vbus_calamp_indicators_0": null,
+					"vbus_calamp_indicators_1": null,
+					"vbus_fuel_flow": {},
+					"vbus_battery_volt": null,
+					"vbus_trip_fuel": {},
+					"vbus_fuel_usage": {},
+					"vbus_calculated_odometer": {},
+					"vbus_calculated_fuel_usage": {},
+					"vbus_inst_fuel_economy": {},
+					"vbus_dtc_count": null,
+					"throttle_valve_percent": null,
+					"vbus_engine_percent_torque": null,
+					"vbus_total_idle_hours": null,
+					"vbus_total_idle_fuel_used": {},
+					"seatbelt_fastened": null,
+					"can_get_seatbelt_fastened": null,
+					"change_oil_lamp_on": null
+				},
+				"device_state": {
+					"drive_status": "off",
+					"drive_status_id": "6fqtDzAaOjygoV81f07-0V",
+					"drive_status_duration": {
+						"value": 111,
+						"unit": "s",
+						"display": "1m 51s"
+					},
+					"drive_status_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"drive_status_lat_lng_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"drive_status_begin_time": "2021-07-03T00:15:16Z",
+					"best_distance_delta": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"is_new_drive_status": false,
+					"adjusted_lat_lng": {
+						"lat": 34.2400855,
+						"lng": -118.36651839999999
+					},
+					"beyond_max_drift_distance": false,
+					"prev_drive_status_duration": {},
+					"prev_drive_status_distance": {},
+					"prev_drive_status_lat_lng_distance": {},
+					"prev_drive_status_begin_time": null,
+					"prev_adjusted_lat_lng": {},
+					"inaccurate_per_device_settings": false,
+					"software_odometer": {},
+					"last_software_odometer_reading_time": null,
+					"hardware_odometer": {
+						"value": 96387000,
+						"unit": "m",
+						"display": "96387000 m"
+					},
+					"odometer": {
+						"value": 96387000,
+						"unit": "m",
+						"display": "96387000 m"
+					},
+					"debug_best_distance_strategy": "lat_lng_trip_invalid",
+					"debug_best_distance": {
+						"value": 0,
+						"unit": "m",
+						"display": "0 m"
+					},
+					"last_known_seatbelt_fastened": null
+				},
+				"device_state_stale": false,
+				"sequence": "2021-07-03 00:17:07.000000|2021-07-03 00:17:07.369967|6fqtF-QDPVyrSk81f07-0V"
+			},
+			"device_groups_id_list": null,
+			"device_field_list": null,
+			"device_ui_settings": {}
+		}
+	]
+}

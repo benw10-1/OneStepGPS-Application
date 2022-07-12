@@ -15,7 +15,7 @@ type User struct {
 	Password string
 	APIKey   string
 	// key value pairs for preferences for formless yet structured
-	Preferences map[string]string
+	Preferences map[string]interface{}
 }
 
 // User without password
@@ -97,8 +97,8 @@ func (x *JSONStruct) AddUser(name string, password string, apiKey string) bool {
 		panic(err)
 	}
 	// Add the user to the store
-	map_ := make(map[string]string)
-	map_["test"] = "test"
+	map_ := make(map[string]interface{})
+
 	newUser := User{name, string(hashedPassword), apiKey, map_}
 	x.Users = append(x.GetUsers(), newUser)
 
@@ -152,7 +152,7 @@ func (x *JSONStruct) APIKeyExists(apiKey string) bool {
 }
 
 // Gets a user's preferences
-func (x *JSONStruct) GetPreferences(name string) map[string]string {
+func (x *JSONStruct) GetPreferences(name string) map[string]interface{} {
 	for _, user := range x.GetUsers() {
 		if user.Name == name {
 			return user.Preferences
@@ -162,7 +162,7 @@ func (x *JSONStruct) GetPreferences(name string) map[string]string {
 }
 
 // Sets a user's preferences
-func (x *JSONStruct) SetPreferences(name string, preferences map[string]string) {
+func (x *JSONStruct) SetPreferences(name string, preferences map[string]interface{}) {
 	for i, user := range x.GetUsers() {
 		if user.Name == name {
 			// Set the preferences by reference to original user in array

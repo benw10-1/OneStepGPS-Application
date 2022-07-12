@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { Holder } from '../helpers'
+import { Holder, PreferenceHolder } from '../helpers'
 import "leaflet/dist/leaflet.css";
 import L from "leaflet"
 import "leaflet-rotatedmarker"
@@ -15,12 +15,14 @@ export default {
     // add our rerender triggers to our data updater and initalialize map and resize trigger
     mounted() {
         Holder.onUpdate(this.updateDevices)
+        PreferenceHolder.onUpdate(this.updateSettings)
         this.initMap()
         window.addEventListener('resize', this.resizer)
     },
     // remove our rerender triggers from our data updater and remove map and resize trigger
     unmounted() {
         Holder.removeUpdate(this.updateDevices)
+        PreferenceHolder.removeUpdate(this.updateSettings)
         window.removeEventListener('resize', this.resizer)
     },
     data() {
@@ -36,6 +38,7 @@ export default {
             featureLayer: null,
             loaded: false,
             tileLayer: null,
+            showSettings: false,
             // colors based on device status
             colors: {
                 off: "rgba(255, 0, 0, .67)",
@@ -43,9 +46,8 @@ export default {
                 idle: "rgba(135, 206, 250, .67)",
                 offline: "rgba(218, 223, 225, 1)",
             },
-            settings: {
+            settings: PreferenceHolder.get().mapSettings ?? {
                 showLabels: true,
-                grouping: true
             }
         }
     },
@@ -69,7 +71,7 @@ export default {
                 if (this.display.length && this.featureLayer) {
                     this.featureLayer.clearLayers()
                     // remap all of our features to new devices
-                    this.featureLayer.addData(this.display.map(device => ({
+                    this.featureLayer.addData(this.display.map((device, i) => ({
                         type: 'Feature',
                         // "Point" for geojson will be converted to marker
                         geometry: {
@@ -78,7 +80,7 @@ export default {
                         },
                         // props passed to marker so that we can access them later
                         properties: {
-                            device_id: device.device_id,
+                            device_id: device.device_id ?? i,
                             display_name: device.display_name,
                             drive_status: device.drive_status,
                             drive_status_begin_time: device.drive_status_begin_time,
@@ -87,27 +89,50 @@ export default {
                             lat: device.lat,
                             lng: device.lng,
                             color: device.online ? this.colors[device.drive_status] : this.colors['offline'],
+                            speed: device.speed,
                         }
                     })))
                 }
             }
         },
         updateSettings(settings) {
-            this.settings = settings
+            if (settings.isPrefs__) {
+                settings = settings.mapSettings ?? {}
+                console.log(settings, "ispref")
+            }
+            this.settings = {
+                ...this.settings,
+                ...settings,
+            }
+            // console.log(settings)
+            PreferenceHolder.set({ mapSettings: this.settings }, this.updateSettings)
             this.updateDevices(this.devices)
+        },
+        changeMapType(type, map = this.map) {
+            if (!this.tileLayer) {
+                this.tileLayer = L.tileLayer(null, {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map)
+            }
+            if (type === "satelite") {
+                this.tileLayer.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}")
+            }
+            else {
+                this.tileLayer.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+            }
         },
         initMap() {
             // view controls custom
             const map = L.map('map-target', {
                 // attributionControl: false,
                 zoomControl: false,
+                // zoomAnimation:false,
+                fadeAnimation: true,
+                markerZoomAnimation: true
                 // renderer: L.canvas(),
             });
 
-            // Open Street Map Tile Layer
-            this.tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            this.changeMapType("normal", map)
 
             map.setMaxZoom(18);
             map.setMinZoom(3);
@@ -116,38 +141,63 @@ export default {
                 // on point create. Returns marker to be created with geoJSON data
                 pointToLayer: (feature, latlng) => {
                     // the icon for our marker
+                    const angle = feature.properties.heading 
+                    const svgSt = `transform-box: fill-box; transform-origin: center; transform: rotate(${angle}deg);`
+                    const [short, long] = ["8px", "14px"]
+                    const transformLabel = `transform: translate(${
+                        (() => {
+                            if (angle < 45) {
+                                return short
+                            }
+                            if (angle < 135) {
+                                return long
+                            }
+                            return short
+                        })()
+                    }, -50%);`
                     const svgIcon = L.divIcon({
                         className: 'device-icon',
                         // the physical HTML element being disaplyed at point [lat, lon]
-                        html: `<div class="device-icon-inner">
-                            <svg
-                              width="24"
-                              height="40"
-                              viewBox="-26.5 -71.5 53 73"
-                              preserveAspectRatio="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path 
-                                shape-rendering="optimizeQuality" 
-                                d="M 25 0 L 0 -10 L -25 0 L 0 -55 Z" 
-                                stroke="#000000" 
-                                stroke-width="1" 
-                                fill="${feature.properties.color}"
-                              />
-                            </svg>
+                        html: `<div class="device-icon-inner" id=${feature.properties.device_id} >
+                            <div style="${svgSt}">
+                                <svg
+                                    width="24"
+                                    height="35"
+                                    viewBox="-26.5 -29 53 58"
+                                    preserveAspectRatio="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path 
+                                        shape-rendering="optimizeQuality" 
+                                        d="M 25 27.5 L 0 17.5 L -25 27.5 L 0 -27.5 Z" 
+                                        stroke="#000000" 
+                                        stroke-width="1" 
+                                        fill="${feature.properties.color}"
+                                    />
+                                </svg>
+                            </div>
+                            ${this.settings.showLabels ? `
+                            <div class="device-label-anchor" style="${transformLabel}">
+                                <div class="device-label">
+                                    <div class="label-content">
+                                        ${feature.properties.display_name + (feature.properties.speed ? ` (${feature.properties.speed} mph)` : ``)}
+                                    </div>
+                                    <div class="tail-shadow"></div>
+                                    <div class="tail-layer"></div>
+                                    <div class="tail-background"></div>
+                                </div>
+                            </div>` : ''}
                         </div>`,
                         iconSize: [40, 40],
                         iconAnchor: [20, 20],
-                        popupAnchor: [0, -20],
+                        tooltipAnchor: [8, 0],
                     })
 
                     const marker = L.marker(latlng, {
                         icon: svgIcon,
                         // imported with leaflet-rotatedmarker
-                        rotationAngle: feature.properties.heading,
+                        // rotationAngle: feature.properties.heading,
                     })
-
-                    if (settings.showLabels) marker.bindTooltip(feature.properties.display_name).openTooltip()
 
                     return marker
                 },
@@ -166,11 +216,16 @@ export default {
                     this.loaded = true
                     this.$emit("map-loaded", {
                         moveCenter: this.moveCenter,
-
                     })
-                }, 10)
+                }, 50)
                 this.map = map
             })
+            const preventDouble = function (el) {
+                L.DomEvent.on(el, 'click', L.DomEvent.stopPropagation);
+                L.DomEvent.on(el, 'click', L.DomEvent.preventDefault);
+                L.DomEvent.on(el, 'dblclick', L.DomEvent.stopPropagation);
+                L.DomEvent.on(el, 'dblclick', L.DomEvent.preventDefault);
+            }
             // add view controls
             const parent = this
             L.Control.ViewControls = L.Control.extend({
@@ -189,22 +244,18 @@ export default {
                     const zoomOutMap = L.DomUtil.create('span', 'material-icons-outlined', zoomOutMapButton);
                     zoomOutMap.innerHTML = 'zoom_out_map';
 
-                    L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
-                    L.DomEvent.on(container, 'click', L.DomEvent.preventDefault);
+                    preventDouble(container)
 
-                    L.DomEvent.on(zoomInButton, 'click', L.DomEvent.stopPropagation);
-                    L.DomEvent.on(zoomInButton, 'click', L.DomEvent.preventDefault);
+                    preventDouble(zoomInButton)
                     L.DomEvent.on(zoomInButton, 'click', () => {
                         map.zoomIn();
                     });
 
-                    L.DomEvent.on(zoomOutButton, 'click', L.DomEvent.stopPropagation);
-                    L.DomEvent.on(zoomOutButton, 'click', L.DomEvent.preventDefault);
+                    preventDouble(zoomOutButton)
                     L.DomEvent.on(zoomOutButton, 'click', () => {
                         map.zoomOut();
                     });
-                    L.DomEvent.on(zoomOutMapButton, 'click', L.DomEvent.stopPropagation);
-                    L.DomEvent.on(zoomOutMapButton, 'click', L.DomEvent.preventDefault);
+                    preventDouble(zoomOutMapButton)
                     L.DomEvent.on(zoomOutMapButton, 'click', () => map.fitBounds(parent.getDevicesView()));
 
                     return container;
@@ -223,14 +274,14 @@ export default {
                     const settings = L.DomUtil.create('span', 'material-icons', settingsButton);
                     settings.innerHTML = 'settings';
 
-                    L.DomEvent.on(container, 'click', L.DomEvent.stopPropagation);
-                    L.DomEvent.on(container, 'click', L.DomEvent.preventDefault);
-
-                    L.DomEvent.on(settingsButton, 'click', L.DomEvent.stopPropagation);
-                    L.DomEvent.on(settingsButton, 'click', L.DomEvent.preventDefault);
+                    preventDouble(container)
+                    preventDouble(settingsButton)
                     L.DomEvent.on(settingsButton, 'click', () => {
-                        // map.zoomIn();
-                    });
+                        parent.showSettings = !parent.showSettings
+                        parent.updateSettings({
+                            showLabels: !parent.showLabels,
+                        })
+                    })
 
                     return container;
                 }
@@ -246,12 +297,13 @@ export default {
             map.setView(this.center, 13)
         },
         moveCenter(lat, lng) {
-            this.map.setView([lat, lng], 13)
+            this.map.setView([lat, lng], 6)
             this.center = [lat, lng]
         },
         // return bounding box of all viewable devices
         getDevicesView() {
             if (!this.devices.length) return null
+
             const { left, top, bottom, right } = this.display.reduce((acc, device) => {
                 const { lat, lng } = device
                 // convert to pixel coordinates for actual comparison
@@ -274,6 +326,9 @@ export default {
             const viewPadding = 0.06
             bounds.pad(viewPadding)
 
+            this.map.invalidateSize()
+            this.$forceUpdate()
+
             return bounds
         },
         resizer() {
@@ -294,6 +349,10 @@ export default {
 #map-target {
     width: 100%;
     height: 100%;
+}
+
+#map-target:focus {
+    outline: none;
 }
 
 .view-controller {
@@ -323,5 +382,78 @@ export default {
 
 .view-controller-button:hover {
     background-color: #f5f5f5;
+}
+
+.device-icon-inner {
+    position: relative;
+    display: grid;
+    place-items: center;
+}
+
+.device-label-anchor {
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    z-index: 11;
+}
+
+.device-label {
+    background-color: #ffffff;
+    /* border: 1px solid #73a7f0; */
+    position: relative;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    box-shadow: 0px 0px 8px -1px black;
+    -moz-box-shadow: 0px 0px 8px -1px black;
+    -webkit-box-shadow: 0px 0px 8px -1px black;
+}
+
+.label-content {
+    padding: 0.2rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    color: #000000;
+    white-space: nowrap;
+}
+
+.tail-shadow {
+    background-color: transparent;
+    width: 4px;
+    height: 4px;
+    position: absolute;
+    top: 16px;
+    left: -8px;
+    z-index: -10;
+    box-shadow: 0px 0px 8px 1px black;
+    -moz-box-shadow: 0px 0px 8px 1px black;
+    -webkit-box-shadow: 0px 0px 8px 1px black;
+}
+
+.tail-layer {
+    width: 0px;
+    height: 0px;
+    border: 10px solid;
+    border-color: transparent #e0e0e0 transparent transparent;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: -20px;
+}
+
+.tail-background {
+    width: 0px;
+    height: 0px;
+    border: 10px solid;
+    border-color: transparent #ffffff transparent transparent;
+    position: absolute;
+    left: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.leaflet-marker-icon {
+    display: grid;
+    place-items: center;
 }
 </style>

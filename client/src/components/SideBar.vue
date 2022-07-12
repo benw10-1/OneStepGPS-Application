@@ -2,38 +2,28 @@
   <div class="sidebar">
     <div class="sorting-container">
       <div class="search-bar">
-        <CustomInput placeholder="Search..." margin="0" height="40px" flexItem :onChange="setSearch" :value="search" />
+        <CustomInput placeholder="Filter by name..." margin="0" height="40px" flexItem :onChange="setSearch" :value="search" />
       </div>
       <div class="">
 
       </div>
     </div>
     <div class="devices-container">
-      <div v-for="device of display" class="device-container" v-bind:key="device?.device_id">
-        <div :class="'device-sidebar ' + (device.online ? device.drive_status : 'offline')"></div>
-        <div class="device-inner">
-          <div class="device-main-info">
-            <div class="device-display-name"> 
-              {{ device.display_name }}
-            </div>
-            <div class="device-status">
-              {{ (device.online ? driveStates[device.drive_status] : "No signal") + ' ' + formatTime(device.drive_status_begin_time) }}
-            </div>
-          </div>
-        </div>
-      </div>
+        <DeviceComponent v-for="device of devices" :device="device" v-bind:key="device.device_id" />
     </div>
   </div>
 </template>
 
 <script>
-import { Holder, dateFormatter } from '../helpers'
+import { Holder } from '../helpers'
 import CustomInput from './CustomInput.vue'
+import DeviceComponent from './Device.vue'
 
 export default {
   name: 'SideBar',
   components: {
-    CustomInput
+    CustomInput,
+    DeviceComponent
   },
   mounted() {
     Holder.onUpdate(this.updateDevices)
@@ -48,17 +38,6 @@ export default {
       search: '',
       // filtered devices to display
       display: [],
-      colors: {
-        off: "rgba(255, 0, 0, .67)",
-        driving: "rgba(0, 255, 0, .67)",
-        idle: "rgba(135, 206, 250, .67)",
-        offline: "rgba(218, 223, 225, .8)",
-      },
-      driveStates: {
-        off: "Stopped",
-        driving: "Driving",
-        idle: "Idle",
-      },
       firstLoad: true,
     }
   },
@@ -82,11 +61,6 @@ export default {
       return this.devices.filter(device => {
         return device.display_name.toLowerCase().includes(this.search.toLowerCase().trim())
       })
-    },
-    formatTime(time) {
-      const date = new Date() - new Date(time)
-
-      return dateFormatter(date.valueOf() / 1000)
     },
   }
 }
@@ -112,56 +86,5 @@ export default {
   margin: 0;
   box-sizing: border-box;
   border-bottom: 1px solid rgba(0,0,0,.12);
-}
-
-.device-container {
-  flex: 1;
-  height: auto;
-  display: flex;
-  position: relative;
-  align-items: center;
-  flex-direction: row;
-  box-sizing: border-box;
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(0,0,0,.12);
-}
-
-.device-sidebar {
-  width: 6.5px;
-  height: calc(100% - 20px);
-  position: absolute;
-  left: 0;
-  z-index: 1;
-  box-sizing: border-box;
-}
-.off {
-  background: v-bind("colors.off");
-}
-.driving {
-  background: v-bind("colors.driving");
-}
-.idle {
-  background: v-bind("colors.idle");
-}
-.offline {
-  background: v-bind("colors.offline");
-}
-
-.device-inner {
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.device-display-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0,0,0,.87);
-}
-.device-status {
-  font-size: 12px;
-  font-weight: 400;
-  color: rgba(0,0,0,.54);
 }
 </style>

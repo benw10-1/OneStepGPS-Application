@@ -33,6 +33,7 @@ function Holder () {
 
         return updateFuncs.length - 1;
     }
+
     // remove update function
     function removeUpdate(callback) {
         if (typeof callback === 'number') {
@@ -43,6 +44,18 @@ function Holder () {
         }
     }
 
+    function manualUpdate(data) {
+        data = data || Dummy;
+        data = data?.result_list ?? data ?? [];
+        // call all update functions with data
+        for (const func of updateFuncs) {
+            if (func) func(data);
+        }
+        store.data = data;
+
+        return data;
+    }
+
     const interval = setInterval(refresh, 10000);
     refresh();
 
@@ -51,6 +64,7 @@ function Holder () {
         refresh,
         onUpdate,
         removeUpdate,
+        manualUpdate,
         store,
         interval
     }

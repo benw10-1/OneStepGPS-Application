@@ -1,7 +1,9 @@
 import { Requests } from ".";
 
 function PrefHolder () {
-    let data = {};
+    let data = {
+        isPrefs__: true
+    };
     let updateFuncs = [];
 
     function onUpdate(callback) {
@@ -22,23 +24,28 @@ function PrefHolder () {
         return data;
     }
 
-    async function set(data_) {
+    async function set(data_, func_=null) {
         if (data_ instanceof Promise) {
             data_ = await data_;
         }
         else if (typeof data_ === 'function') {
-            data_ = await data_();
+            data_ = await data_(data);
         }
-        else data = data_;
-        
-        updateFuncs.forEach(func => func(data));
 
+        data = { ...data, ...data_ };
+        
+        updateFuncs.forEach(func => {if (func_ !== func) func(data)});
+        
         await Requests.setPreferences(data);
 
         return data;
     }
 
-    // set(Requests.getPreferences());
+    Requests.getPreferences().then(data_ => {
+        if (!data_) return
+        data = { ...data, ...data_ };
+        updateFuncs.forEach(func => func(data));
+    })
 
     return {
         get,

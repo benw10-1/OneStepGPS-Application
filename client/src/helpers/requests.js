@@ -66,6 +66,7 @@ async function getDevices() {
     const url = HOST_URL + 'api/getDevices';
 
     return base(url).then(data => {
+        if (!data) return Promise.reject('No data');
         const devices = []
         for (const device of data?.result_list ?? data ?? []) {
             const formatted = {
@@ -77,12 +78,13 @@ async function getDevices() {
                 lng: device.latest_device_point?.lng ?? device.lng,
                 drive_status: device.latest_device_point?.device_state?.drive_status ?? device.drive_status,
                 drive_status_begin_time: device.latest_device_point?.device_state?.drive_status_begin_time ?? device.drive_status_begin_time,
+                speed: Math.round(device.latest_device_point?.device_point_detail?.speed?.value * (device.latest_device_point?.device_point_detail?.speed?.unit === 'km/h' ? 0.621371192 : 1) ?? device.speed * 0.621371192),
             }
             devices.push(formatted);
         }
         // console.log(devices);
         return devices;
-    });
+    })
 }
 
 async function setAPIKey(key) {

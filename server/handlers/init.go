@@ -155,14 +155,14 @@ func SetAPIKey(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		http.Error(w, `"Error reading request body"`, http.StatusInternalServerError)
 	}
 	// unmarshal body into data
 	var data map[string]string
 	err = json.Unmarshal(body, &data)
 
 	if err != nil {
-		http.Error(w, "Error parsing JSON", http.StatusInternalServerError)
+		http.Error(w, `"Error parsing JSON"`, http.StatusInternalServerError)
 		return
 	}
 
@@ -177,7 +177,7 @@ func SetAPIKey(w http.ResponseWriter, r *http.Request) {
 
 func GetDevices(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, `"Method not allowed"`, http.StatusMethodNotAllowed)
 		return
 	}
 	Headers(w)
@@ -226,7 +226,7 @@ func Preferences(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			fmt.Println(err)
-			w.Write([]byte("Error: " + err.Error()))
+			w.Write([]byte(`"Error: ` + err.Error() + `"`))
 			return
 		}
 
@@ -234,10 +234,10 @@ func Preferences(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			http.Error(w, "Error reading request body", http.StatusInternalServerError)
+			http.Error(w, `"Error reading request body"`, http.StatusInternalServerError)
 		}
 		// unmarshal body into preferences
-		var preferences map[string]string
+		var preferences map[string]interface{}
 		err = json.Unmarshal(body, &preferences)
 
 		if err != nil {
@@ -247,8 +247,8 @@ func Preferences(w http.ResponseWriter, r *http.Request) {
 		jsonStruct.SetPreferences(user.Name, preferences)
 
 		save()
-		w.Write([]byte("Success"))
+		w.Write([]byte(`"Success"`))
 	} else {
-		w.Write([]byte("Error: Method not allowed"))
+		w.Write([]byte(`"Error: Method not allowed"`))
 	}
 }
