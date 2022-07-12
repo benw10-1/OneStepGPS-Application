@@ -2,14 +2,19 @@
   <div class="sidebar">
     <div class="sorting-container">
       <div class="search-bar">
-        <CustomInput placeholder="Filter by name..." margin="0" height="40px" flexItem :onChange="setSearch" :value="search" />
+        <CustomInput placeholder="Search by name..." margin="0" height="40px" flexItem :onChange="setSearch"
+          :value="search">
+          <span class="material-icons-outlined">
+            search
+          </span>
+        </CustomInput>
       </div>
       <div class="">
 
       </div>
     </div>
     <div class="devices-container">
-        <DeviceComponent v-for="device of devices" :device="device" v-bind:key="device.device_id" />
+      <DeviceComponent v-for="device of display" :device="device" v-bind:key="device.device_id" />
     </div>
   </div>
 </template>
@@ -85,6 +90,6 @@ export default {
   align-items: center;
   margin: 0;
   box-sizing: border-box;
-  border-bottom: 1px solid rgba(0,0,0,.12);
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
 }
 </style>

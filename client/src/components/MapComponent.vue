@@ -1,6 +1,21 @@
 <template>
     <div class="map-container">
         <div id="map-target"></div>
+        <div class="settings-panel" v-if="showSettings">
+            <div class="setting-header">
+                <span>Map Settings</span>
+                <span class="close material-icons-outlined" @click="hideSettingsPanel">
+                    close
+                </span>
+            </div>
+            <div class="settings-container">
+                <SwitchSetting text="Map Display" :switch-array="['SATELITE', 'STREET']" :onChange="(change) => {
+                    updateSettings({
+                        mapDisplay: change
+                    })
+                }" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -8,10 +23,17 @@
 import { Holder, PreferenceHolder } from '../helpers'
 import "leaflet/dist/leaflet.css";
 import L from "leaflet"
-import "leaflet-rotatedmarker"
+import SwitchSetting from './SwitchSetting.vue';
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet.markercluster/dist/leaflet.markercluster-src.js";
+// import "leaflet-rotatedmarker"
 
 export default {
     name: 'MapComponent',
+    components: {
+        SwitchSetting
+    },
     // add our rerender triggers to our data updater and initalialize map and resize trigger
     mounted() {
         Holder.onUpdate(this.updateDevices)
@@ -39,6 +61,7 @@ export default {
             loaded: false,
             tileLayer: null,
             showSettings: false,
+            geoJSON: null,
             // colors based on device status
             colors: {
                 off: "rgba(255, 0, 0, .67)",
@@ -48,113 +71,44 @@ export default {
             },
             settings: PreferenceHolder.get().mapSettings ?? {
                 showLabels: true,
+                cluster: true,
             }
         }
     },
     methods: {
-        // main update method
-        updateDevices(data) {
-            if (!data) return
-            // create copy of array to always trigger rerender
-            this.devices = data instanceof Array ? [...data] : { ...data }
-            this.display = this.devices
-            // if map is loaded, update map
-            if (this.map && this.loaded) {
-                if (this.first) {
-                    this.first = false
-                    // center map on a box that contains all devices
-                    if (this.devices.length) this.map.fitBounds(this.getDevicesView())
-                    // resize map after loading
-                    this.map.invalidateSize()
-                }
-
-                if (this.display.length && this.featureLayer) {
-                    this.featureLayer.clearLayers()
-                    // remap all of our features to new devices
-                    this.featureLayer.addData(this.display.map((device, i) => ({
-                        type: 'Feature',
-                        // "Point" for geojson will be converted to marker
-                        geometry: {
-                            type: 'Point',
-                            coordinates: [device.lng, device.lat]
-                        },
-                        // props passed to marker so that we can access them later
-                        properties: {
-                            device_id: device.device_id ?? i,
-                            display_name: device.display_name,
-                            drive_status: device.drive_status,
-                            drive_status_begin_time: device.drive_status_begin_time,
-                            heading: device.heading,
-                            online: device.online,
-                            lat: device.lat,
-                            lng: device.lng,
-                            color: device.online ? this.colors[device.drive_status] : this.colors['offline'],
-                            speed: device.speed,
-                        }
-                    })))
-                }
-            }
+        showSettingsPanel() {
+            this.showSettings = true
+            console.log("showSettingsPanel")
         },
-        updateSettings(settings) {
-            if (settings.isPrefs__) {
-                settings = settings.mapSettings ?? {}
-                console.log(settings, "ispref")
-            }
-            this.settings = {
-                ...this.settings,
-                ...settings,
-            }
-            // console.log(settings)
-            PreferenceHolder.set({ mapSettings: this.settings }, this.updateSettings)
-            this.updateDevices(this.devices)
+        hideSettingsPanel() {
+            this.showSettings = false
         },
-        changeMapType(type, map = this.map) {
-            if (!this.tileLayer) {
-                this.tileLayer = L.tileLayer(null, {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map)
-            }
-            if (type === "satelite") {
-                this.tileLayer.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}")
-            }
+        changeCluster(cluster, map = this.map, init=false) {
+            if (!init && cluster === this.settings.cluster) return
             else {
-                this.tileLayer.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+                this.updateSettings({ cluster })
             }
-        },
-        initMap() {
-            // view controls custom
-            const map = L.map('map-target', {
-                // attributionControl: false,
-                zoomControl: false,
-                // zoomAnimation:false,
-                fadeAnimation: true,
-                markerZoomAnimation: true
-                // renderer: L.canvas(),
-            });
+            console.log("changeCluster", cluster)
 
-            this.changeMapType("normal", map)
+            if (this.featureLayer) this.featureLayer.remove()
 
-            map.setMaxZoom(18);
-            map.setMinZoom(3);
-            // geoJSON function wrapper
-            this.featureLayer = L.geoJSON(null, {
+            this.geoJSON = L.geoJSON(this.display, {
                 // on point create. Returns marker to be created with geoJSON data
                 pointToLayer: (feature, latlng) => {
                     // the icon for our marker
-                    const angle = feature.properties.heading 
-                    const svgSt = `transform-box: fill-box; transform-origin: center; transform: rotate(${angle}deg);`
+                    const angle = feature.properties.heading
+                    const svgSt = `transform-box: fill-box; transform-origin: center; transform: rotate(${angle}deg); height: auto;`
                     const [short, long] = ["8px", "14px"]
-                    const transformLabel = `transform: translate(${
-                        (() => {
-                            if (angle < 45) {
-                                return short
-                            }
-                            if (angle < 135) {
-                                return long
-                            }
+                    const transformLabel = `transform: translate(${(() => {
+                        if (angle < 45) {
                             return short
-                        })()
-                    }, -50%);`
+                        }
+                        if (angle < 135) {
+                            return long
+                        }
+                        return short
+                    })()
+                        }, -50%);`
                     const svgIcon = L.divIcon({
                         className: 'device-icon',
                         // the physical HTML element being disaplyed at point [lat, lon]
@@ -208,8 +162,127 @@ export default {
                         this.$emit('device-click', feature.properties)
                     })
                 }
-            }).addTo(map);
-            // laod trigger
+            })
+
+            if (cluster) {
+                this.featureLayer = L.markerClusterGroup({
+                    showCoverageOnHover: false,
+                    spiderfyOnMaxZoom: false,
+                    zoomToBoundsOnClick: true,
+                    maxClusterRadius: 40,
+                    // singleMarkerMode: true,
+                    // iconCreateFunction: (cluster) => {
+                    //     return L.divIcon({
+                    //         html: `<div class="marker-cluster">${cluster.getChildCount()}</div>`,
+                    //         className: 'marker-cluster',
+                    //         iconSize: [40, 40],
+                    //         iconAnchor: [20, 40],
+                    //     })
+                    // }
+                })
+                this.featureLayer.addLayer(this.geoJSON)
+                map.addLayer(this.featureLayer)
+            }
+            else {
+                this.featureLayer = this.geoJSON.addTo(map)
+                map.addLayer(this.featureLayer)
+                this.updateDevices(this.devices)
+            }
+        },
+        // main update method
+        updateDevices(data) {
+            if (!data) return
+            // create copy of array to always trigger rerender
+            this.devices = data instanceof Array ? [...data] : { ...data }
+            this.display = this.devices
+            // if map is loaded, update map
+            if (this.map && this.loaded) {
+                if (this.first) {
+                    this.first = false
+                    // center map on a box that contains all devices
+                    if (this.devices.length) this.map.fitBounds(this.getDevicesView())
+                    // resize map after loading
+                    this.map.invalidateSize()
+                }
+
+                if (this.display.length && this.featureLayer) {
+                    this.geoJSON.clearLayers()
+                    // remap all of our features to new devices
+                    this.geoJSON.addData(this.display.map((device, i) => {
+                        if (!device.lat || !device.lng) return {}
+                        return {
+                            type: 'Feature',
+                            // "Point" for geojson will be converted to marker
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [device.lng, device.lat]
+                            },
+                            // props passed to marker so that we can access them later
+                            properties: {
+                                device_id: device.device_id ?? i,
+                                display_name: device.display_name,
+                                drive_status: device.drive_status,
+                                drive_status_begin_time: device.drive_status_begin_time,
+                                heading: device.heading,
+                                online: device.online,
+                                lat: device.lat,
+                                lng: device.lng,
+                                color: device.online ? this.colors[device.drive_status] : this.colors['offline'],
+                                speed: device.speed,
+                            }
+                        }
+                    }))
+                }
+            }
+        },
+        updateSettings(settings) {
+            if (settings.isPrefs__) {
+                settings = settings.mapSettings ?? {}
+            }
+            this.settings = {
+                ...this.settings,
+                ...settings,
+            }
+            // console.log(settings)
+            if (settings.mapDisplay) {
+                this.changeMapType(settings.mapDisplay.toLowerCase())
+            }
+            if (!settings.isPrefs__) PreferenceHolder.set({ mapSettings: this.settings }, this.updateSettings)
+            this.updateDevices(this.devices)
+        },
+        changeMapType(type, map = this.map) {
+            if (!this.tileLayer) {
+                this.tileLayer = L.tileLayer(null, {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map)
+            }
+            if (type === this.settings?.mapType ?? "street") {
+                return
+            }
+            if (type === "satelite") {
+                this.tileLayer.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}")
+            }
+            else {
+                this.tileLayer.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+            }
+        },
+        initMap() {
+            // view controls custom
+            const map = L.map('map-target', {
+                // attributionControl: false,
+                zoomControl: false,
+                // zoomAnimation:false,
+                fadeAnimation: true,
+                markerZoomAnimation: true
+                // renderer: L.canvas(),
+            });
+
+            this.changeMapType(this.settings.mapType ?? "street", map)
+            this.changeCluster(false, map, true)
+
+            map.setMaxZoom(18);
+            map.setMinZoom(3);
+            // load trigger
             map.on("load", () => {
                 setTimeout(() => {
                     map.invalidateSize()
@@ -225,6 +298,12 @@ export default {
                 L.DomEvent.on(el, 'click', L.DomEvent.preventDefault);
                 L.DomEvent.on(el, 'dblclick', L.DomEvent.stopPropagation);
                 L.DomEvent.on(el, 'dblclick', L.DomEvent.preventDefault);
+                L.DomEvent.on(el, 'mouseover', () => {
+                    map.dragging.disable()
+                });
+                L.DomEvent.on(el, 'mouseout', () => {
+                    map.dragging.enable()
+                });
             }
             // add view controls
             const parent = this
@@ -247,16 +326,21 @@ export default {
                     preventDouble(container)
 
                     preventDouble(zoomInButton)
-                    L.DomEvent.on(zoomInButton, 'click', () => {
+                    L.DomEvent.on(zoomInButton, 'click', (e) => {
+                        e.currentTarget.blur();
                         map.zoomIn();
                     });
 
                     preventDouble(zoomOutButton)
-                    L.DomEvent.on(zoomOutButton, 'click', () => {
+                    L.DomEvent.on(zoomOutButton, 'click', (e) => {
+                        e.currentTarget.blur();
                         map.zoomOut();
                     });
                     preventDouble(zoomOutMapButton)
-                    L.DomEvent.on(zoomOutMapButton, 'click', () => map.fitBounds(parent.getDevicesView()));
+                    L.DomEvent.on(zoomOutMapButton, 'click', (e) => {
+                        e.currentTarget.blur();
+                        map.fitBounds(parent.getDevicesView());
+                    });
 
                     return container;
                 }
@@ -277,10 +361,7 @@ export default {
                     preventDouble(container)
                     preventDouble(settingsButton)
                     L.DomEvent.on(settingsButton, 'click', () => {
-                        parent.showSettings = !parent.showSettings
-                        parent.updateSettings({
-                            showLabels: !parent.showLabels,
-                        })
+                        parent.showSettingsPanel()
                     })
 
                     return container;
@@ -326,9 +407,6 @@ export default {
             const viewPadding = 0.06
             bounds.pad(viewPadding)
 
-            this.map.invalidateSize()
-            this.$forceUpdate()
-
             return bounds
         },
         resizer() {
@@ -344,6 +422,7 @@ export default {
     flex: 1;
     height: 100%;
     box-sizing: border-box;
+    position: relative;
 }
 
 #map-target {
@@ -384,6 +463,10 @@ export default {
     background-color: #f5f5f5;
 }
 
+.view-controller-button:active {
+    background-color: #e0e0e0;
+}
+
 .device-icon-inner {
     position: relative;
     display: grid;
@@ -399,7 +482,6 @@ export default {
 
 .device-label {
     background-color: #ffffff;
-    /* border: 1px solid #73a7f0; */
     position: relative;
     border-radius: 4px;
     -moz-border-radius: 4px;
@@ -452,8 +534,42 @@ export default {
     top: 50%;
     transform: translateY(-50%);
 }
+
 .leaflet-marker-icon {
     display: grid;
     place-items: center;
+}
+
+.settings-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 300px;
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12);
+    background: white;
+    padding: 12px 10px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-header {
+    position: relative;
+    padding: "0.2rem 0.4rem";
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.2rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: right;
+    cursor: pointer;
 }
 </style>

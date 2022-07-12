@@ -9,6 +9,8 @@
 import DashBoard from './pages/DashBoard.vue'
 import LogIn from './pages/LogIn.vue'
 import { Auth } from './helpers'
+import "material-icons/iconfont/filled.css"
+import "material-icons/iconfont/outlined.css"
 
 export default {
   name: 'App',

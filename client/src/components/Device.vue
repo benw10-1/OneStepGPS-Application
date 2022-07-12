@@ -13,7 +13,7 @@
                 </div>
             </div>
             <div class="device-right">
-                <div class="device-speed">
+                <div class="device-speed" v-if="device.online">
                     <span>{{ device.speed + " mph" }}</span>
                 </div>
                 <div class="buttons">

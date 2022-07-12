@@ -4,16 +4,20 @@
             <span>{{ required ? label + " *" : label }}</span>
         </div>
         <div class="input-relative">
-            <div class="input-container" v-on:mouseenter="entered_" v-on:mouseleave="left_" v-on:click="() => {this.$refs.input.focus()}">
-            <input v-bind:type="type" v-bind:value="onChange ? value : value_"
-                v-on:input="(e) => { onChange_(e.currentTarget.value) }" v-bind:placeholder="placeholder"
-                v-bind:disabled="disabled" v-bind:autocorrect="autocomplete" v-bind:autocapitalize="autocomplete"
-                v-bind:spellcheck="autocomplete" v-bind:autocomplete="autocomplete" ref="input" v-on:blur="unfocus_"
-                v-on:focus="focus_" />
-            <div class="error-message" v-if="error_">
-                <span>{{ error_ }}</span>
+            <div class="input-container" v-on:mouseenter="entered_" v-on:mouseleave="left_"
+                v-on:click="() => { this.$refs.input.focus() }">
+                <input v-bind:type="type" v-bind:value="onChange ? value : value_"
+                    v-on:input="(e) => { onChange_(e.currentTarget.value) }" v-bind:placeholder="placeholder"
+                    v-bind:disabled="disabled" v-bind:autocorrect="autocomplete" v-bind:autocapitalize="autocomplete"
+                    v-bind:spellcheck="autocomplete" v-bind:autocomplete="autocomplete" ref="input" v-on:blur="unfocus_"
+                    v-on:focus="focus_" />
+                <div class="error-message" v-if="error_">
+                    <span>{{ error_ }}</span>
+                </div>
+                <div class="right-icon">
+                    <slot></slot>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 </template>
@@ -196,6 +200,7 @@ export default {
     font-size: v-bind(labelFontSize);
     font-weight: v-bind(labelFontWeight);
 }
+
 .input-relative {
     height: calc(v-bind(height));
     position: relative;
@@ -205,6 +210,7 @@ export default {
     align-items: center;
     box-sizing: border-box;
 }
+
 .input-container {
     display: flex;
     height: 100%;
@@ -216,6 +222,7 @@ export default {
     box-sizing: border-box;
     margin: 0;
     cursor: text;
+    position: relative;
 }
 
 .input-container input {
@@ -228,7 +235,6 @@ export default {
     font-weight: v-bind(inputFontWeight);
     color: v-bind(inputColor);
     background-color: transparent;
-    left: .65em;
     top: 50%;
     transform: translateY(-50%);
     margin: 0;
@@ -244,5 +250,16 @@ export default {
     margin: 0;
     padding: 0;
     transform: translate(0, 120%);
+}
+
+.right-icon {
+    position: absolute;
+    right: .65em;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
 }
 </style>
