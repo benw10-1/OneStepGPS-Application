@@ -3,13 +3,11 @@
         <div class="option-label">
             {{ text }}
         </div>
-        <div class="options-container" @mouseenter="enter_" @mouseleave="exit_">
-            <div v-for="(item, index) of switchArray" class="switch-option" :style="`left: ${100 * (index - switchIndex)}%`" :key="index">
-                <div class="switch-content">
-                    {{ item }}
-                </div>
+        <button class="options-container" @mouseenter="enter_" @mouseleave="exit_" @mousedown="onMouseDown" @mouseup="onMouseUp">
+            <div v-for="(item, index) of switchArray" class="switch-option" :style='`right: ${100 * (index - switchIndex)}%`' :key="index" @click="next">
+                <span :class="isIcon ? 'material-icons-outlined' : 'underlined'">{{ item }}</span>
             </div>
-        </div>
+        </button>
     </div>
 </template>
 
@@ -32,7 +30,11 @@ export default {
         },
         initial: {
             type: Number,
-            required: true,
+            default: 0,
+        },
+        isIcon: {
+            type: Boolean,
+            default: false,
         },
     },
     data() {
@@ -40,15 +42,16 @@ export default {
             switchIndex: this.initial,
             colors: {
                 selected: "rgba(0, 0, 255, .67)",
-                unselected: "rgba(255, 255, 255, .67)",
+                unselected: "rgba(0, 0, 0, .67)",
             },
             hovered: false,
+            clicked: false,
         }
     },
     methods: {
         next() {
-            this.index = (this.index + 1) % this.switchArray.length
-            this.onChange(this.switchArray[this.index])
+            this.switchIndex = (this.switchIndex + 1) % this.switchArray.length
+            this.onChange(this.switchArray[this.switchIndex])
         },
         enter_() {
             this.hovered = true
@@ -56,11 +59,20 @@ export default {
         exit_() {
             this.hovered = false
         },
+        onMouseDown() {
+            this.clicked = true
+        },
+        onMouseUp() {
+            this.clicked = false
+        },
     },
 }
 </script>
 
 <style>
+.underlined {
+    text-decoration: underline;
+}
 .switch-setting {
     flex: 1;
     height: 50px;
@@ -70,29 +82,39 @@ export default {
 .option-label {
     flex: 1;
     height: 100%;
-    display: grid;
-    place-items: center;
-    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
     font-weight: bold;
     color: v-bind("hovered ? colors.selected : colors.unselected");
     transition: all .2s ease-in;
 }
 .options-container {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    overflow: hidden;
-}
-.switch-option {
     position: relative;
     flex: 1;
     height: 100%;
-    background-color: v-bind("hovered ? 'rgba(155, 155, 155, .67)' : 'transparent'");
-    transition: all .2s ease-in;
+    overflow: hidden;
+    background-color: v-bind("(hovered && !clicked) ? 'rgba(155, 155, 155, .47)' : 'transparent'");
+    border-radius: 5px;
+    transition: v-bind("clicked ? 'none' : 'all .2s ease-in'");
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    border: none;
 }
-.switch-content {
+/* .options-container:focus {
+    outline: none;
+    background-color: #e0e0e0;
+} */
+.switch-option {
+    position: absolute;
     width: 100%;
     height: 100%;
+    top: 0;
+    display: grid;
+    place-items: center;
     color: v-bind("hovered ? colors.selected : colors.unselected");
+    transition: all .2s ease-in;
 }
 </style>

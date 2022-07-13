@@ -1,6 +1,5 @@
 <template>
     <div class="map-container">
-        <div id="map-target"></div>
         <div class="settings-panel" v-if="showSettings">
             <div class="setting-header">
                 <span>Map Settings</span>
@@ -9,18 +8,36 @@
                 </span>
             </div>
             <div class="settings-container">
-                <SwitchSetting text="Map Display" :switch-array="['SATELITE', 'STREET']" :onChange="(change) => {
-                    updateSettings({
-                        mapDisplay: change
-                    })
-                }" />
+                <SwitchSetting :initial="settings.mapDisplay === 'STREET' ? 1 : 0" text="Map Display"
+                    :switch-array="['SATELITE', 'STREET']" :onChange="(change) => {
+                        updateSettings({
+                            mapDisplay: change
+                        })
+                    }" />
+            </div>
+            <div class="settings-container">
+                <SwitchSetting :initial="settings.showLabels ? 0 : 1" text="Labels" :switch-array="['SHOW', 'HIDE']"
+                    :onChange="(change) => { updateSettings({ showLabels: change.toLowerCase() === 'show' }) }" />
+            </div>
+            <div class="settings-container">
+                <SwitchSetting :initial="settings.cluster ? 0 : 1" text="Cluster" :switch-array="['CLUSTER', 'NONE']"
+                    :onChange="(change) => { updateSettings({ cluster: change?.toLowerCase() === 'cluster' }) }" />
+            </div>
+            <div class="setting-header">
+                <span>User Settings</span>
+            </div>
+            <div class="settings-container">
+                <SwitchSetting text="Logout" :switch-array="['logout']" :onChange="(change) => {
+                    logout()
+                }" :is-icon="true" />
             </div>
         </div>
+        <div id="map-target"></div>
     </div>
 </template>
 
 <script>
-import { Holder, PreferenceHolder } from '../helpers'
+import { Holder, PreferenceHolder, Auth } from '../helpers'
 import "leaflet/dist/leaflet.css";
 import L from "leaflet"
 import SwitchSetting from './SwitchSetting.vue';
@@ -36,6 +53,7 @@ export default {
     },
     // add our rerender triggers to our data updater and initalialize map and resize trigger
     mounted() {
+        Holder.refresh()
         Holder.onUpdate(this.updateDevices)
         PreferenceHolder.onUpdate(this.updateSettings)
         this.initMap()
@@ -46,6 +64,9 @@ export default {
         Holder.removeUpdate(this.updateDevices)
         PreferenceHolder.removeUpdate(this.updateSettings)
         window.removeEventListener('resize', this.resizer)
+        if (this.map) {
+            this.map.remove()
+        }
     },
     data() {
         return {
@@ -72,32 +93,155 @@ export default {
             settings: PreferenceHolder.get().mapSettings ?? {
                 showLabels: true,
                 cluster: true,
-            }
+            },
+            selected: null,
         }
     },
     methods: {
+        select(device) {
+            this.selected = device
+            this.moveCenter([device.lat, device.lng])
+            this.updateDevices(this.devices)
+        },
+        deselect() {
+            this.selected = null
+        },
         showSettingsPanel() {
             this.showSettings = true
-            console.log("showSettingsPanel")
+            window.addEventListener('mousedown', this.hideSettingsPanel)
         },
-        hideSettingsPanel() {
+        hideSettingsPanel(e) {
+            if (!e.currentTarget.classList?.contains('close')) {
+                for (const x of e.composedPath()) {
+                    if (x.classList?.contains("settings-panel")) {
+                        return
+                    }
+                }
+            }
+            window.removeEventListener('mousedown', this.hideSettingsPanel)
             this.showSettings = false
         },
-        changeCluster(cluster, map = this.map, init=false) {
-            if (!init && cluster === this.settings.cluster) return
-            else {
-                this.updateSettings({ cluster })
+        logout() {
+            Auth.logout()
+        },
+        changeCluster(cluster, map = this.map) {
+            if (this.featureLayer) map.removeLayer(this.featureLayer)
+
+            this.featureLayer = L.markerClusterGroup({
+                showCoverageOnHover: false,
+                spiderfyOnMaxZoom: false,
+                zoomToBoundsOnClick: true,
+                maxClusterRadius: 52,
+                disableClusteringAtZoom: cluster ? 19 : false,
+            })
+            this.featureLayer.on('clusterclick', (e) => {
+                // on click tell parent we have clicked on a cluster
+                this.$emit('cluster-click', e.layer.getAllChildMarkers())
+            })
+            this.featureLayer.addTo(map)
+        },
+        // main update method
+        updateDevices(data) {
+            if (!data) return
+            // create copy of array to always trigger rerender
+            this.devices = data instanceof Array ? [...data] : { ...data }
+            this.display = this.devices
+            // if map is loaded, update map
+            if (this.map && this.loaded) {
+                if (this.first) {
+                    this.first = false
+                    // center map on a box that contains all devices
+                    if (this.devices.length) this.map.fitBounds(this.getDevicesView())
+                    // resize map after loading
+                    this.map.invalidateSize()
+                }
+
+                if (this.display.length && this.featureLayer) {
+                    this.featureLayer.clearLayers()
+                    // remap all of our features to new devices
+                    const prefs = PreferenceHolder.get()?.deviceSettings ?? {}
+                    this.geoJSON.addData(this.display.map((device, i) => {
+                        if (isNaN(device.lat) || isNaN(device.lng) || !prefs[device.device_id]?.visible) return
+                        // console.log(device)
+                        return {
+                            type: 'Feature',
+                            // "Point" for geojson will be converted to marker
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [device.lng, device.lat],
+                            },
+                            // props passed to marker so that we can access them later
+                            properties: {
+                                device_id: device.device_id ?? i,
+                                display_name: prefs[device.device_id]?.display_name ?? device.display_name,
+                                drive_status: device.drive_status,
+                                drive_status_begin_time: device.drive_status_begin_time,
+                                heading: device.heading,
+                                online: device.online,
+                                lat: device.lat,
+                                lng: device.lng,
+                                color: device.online ? this.colors[device.drive_status] : this.colors['offline'],
+                                speed: device.speed,
+                                selected: this.selected?.device_id === device.device_id,
+                            }
+                        }
+                    }).filter(x => x))
+                }
             }
-            console.log("changeCluster", cluster)
+        },
+        updateSettings(settings) {
+            let safe
+            if (settings.isPrefs__) {
+                settings = settings.mapSettings ?? {}
+            }
+            else {
+                safe = true
+            }
+            if (this.settings !== settings.cluster && settings.cluster !== undefined) this.changeCluster(settings.cluster)
+            this.changeMapType(settings.mapDisplay?.toLowerCase() ?? "street")
+            this.settings = {
+                ...this.settings,
+                ...settings,
+            }
+            if (safe) PreferenceHolder.set({ mapSettings: this.settings }, this.updateSettings)
+            this.updateDevices(this.devices)
+        },
+        changeMapType(type, map = this.map) {
+            if (!this.tileLayer) {
+                this.tileLayer = L.tileLayer(null, {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map)
+            }
+            if (type === this.settings?.mapType ?? "street") {
+                return
+            }
+            if (type === "satelite") {
+                this.tileLayer.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}")
+            }
+            else {
+                this.tileLayer.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+            }
+        },
+        initMap() {
+            // view controls custom
+            const map = L.map('map-target', {
+                // attributionControl: false,
+                zoomControl: false,
+                // zoomAnimation:false,
+                fadeAnimation: true,
+                markerZoomAnimation: true
+                // renderer: L.canvas(),
+            });
 
-            if (this.featureLayer) this.featureLayer.remove()
+            this.changeMapType(this.settings.mapType ?? "street", map)
+            this.changeCluster(this.settings.cluster, map)
 
-            this.geoJSON = L.geoJSON(this.display, {
+            this.geoJSON = L.geoJSON(null, {
                 // on point create. Returns marker to be created with geoJSON data
                 pointToLayer: (feature, latlng) => {
                     // the icon for our marker
                     const angle = feature.properties.heading
-                    const svgSt = `transform-box: fill-box; transform-origin: center; transform: rotate(${angle}deg); height: auto;`
+                    const svgSt = `transform-box: fill-box; transform-origin: center; transform: rotate(${angle}deg); height: 35px; position: relative;`
                     const [short, long] = ["8px", "14px"]
                     const transformLabel = `transform: translate(${(() => {
                         if (angle < 45) {
@@ -114,6 +258,7 @@ export default {
                         // the physical HTML element being disaplyed at point [lat, lon]
                         html: `<div class="device-icon-inner" id=${feature.properties.device_id} >
                             <div style="${svgSt}">
+                                ${feature.properties.selected ? `<div class="device-icon-selected"></div>` : ``}
                                 <svg
                                     width="24"
                                     height="35"
@@ -157,6 +302,9 @@ export default {
                 },
                 // on feature create
                 onEachFeature: (feature, layer) => {
+                    // geoJSON data is passed to the display layer
+                    this.featureLayer.addLayer(layer)
+
                     layer.on('click', () => {
                         // on click tell parent we have clicked on a device
                         this.$emit('device-click', feature.properties)
@@ -164,131 +312,17 @@ export default {
                 }
             })
 
-            if (cluster) {
-                this.featureLayer = L.markerClusterGroup({
-                    showCoverageOnHover: false,
-                    spiderfyOnMaxZoom: false,
-                    zoomToBoundsOnClick: true,
-                    maxClusterRadius: 40,
-                    // singleMarkerMode: true,
-                    // iconCreateFunction: (cluster) => {
-                    //     return L.divIcon({
-                    //         html: `<div class="marker-cluster">${cluster.getChildCount()}</div>`,
-                    //         className: 'marker-cluster',
-                    //         iconSize: [40, 40],
-                    //         iconAnchor: [20, 40],
-                    //     })
-                    // }
-                })
-                this.featureLayer.addLayer(this.geoJSON)
-                map.addLayer(this.featureLayer)
-            }
-            else {
-                this.featureLayer = this.geoJSON.addTo(map)
-                map.addLayer(this.featureLayer)
-                this.updateDevices(this.devices)
-            }
-        },
-        // main update method
-        updateDevices(data) {
-            if (!data) return
-            // create copy of array to always trigger rerender
-            this.devices = data instanceof Array ? [...data] : { ...data }
-            this.display = this.devices
-            // if map is loaded, update map
-            if (this.map && this.loaded) {
-                if (this.first) {
-                    this.first = false
-                    // center map on a box that contains all devices
-                    if (this.devices.length) this.map.fitBounds(this.getDevicesView())
-                    // resize map after loading
-                    this.map.invalidateSize()
-                }
-
-                if (this.display.length && this.featureLayer) {
-                    this.geoJSON.clearLayers()
-                    // remap all of our features to new devices
-                    this.geoJSON.addData(this.display.map((device, i) => {
-                        if (!device.lat || !device.lng) return {}
-                        return {
-                            type: 'Feature',
-                            // "Point" for geojson will be converted to marker
-                            geometry: {
-                                type: 'Point',
-                                coordinates: [device.lng, device.lat]
-                            },
-                            // props passed to marker so that we can access them later
-                            properties: {
-                                device_id: device.device_id ?? i,
-                                display_name: device.display_name,
-                                drive_status: device.drive_status,
-                                drive_status_begin_time: device.drive_status_begin_time,
-                                heading: device.heading,
-                                online: device.online,
-                                lat: device.lat,
-                                lng: device.lng,
-                                color: device.online ? this.colors[device.drive_status] : this.colors['offline'],
-                                speed: device.speed,
-                            }
-                        }
-                    }))
-                }
-            }
-        },
-        updateSettings(settings) {
-            if (settings.isPrefs__) {
-                settings = settings.mapSettings ?? {}
-            }
-            this.settings = {
-                ...this.settings,
-                ...settings,
-            }
-            // console.log(settings)
-            if (settings.mapDisplay) {
-                this.changeMapType(settings.mapDisplay.toLowerCase())
-            }
-            if (!settings.isPrefs__) PreferenceHolder.set({ mapSettings: this.settings }, this.updateSettings)
-            this.updateDevices(this.devices)
-        },
-        changeMapType(type, map = this.map) {
-            if (!this.tileLayer) {
-                this.tileLayer = L.tileLayer(null, {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map)
-            }
-            if (type === this.settings?.mapType ?? "street") {
-                return
-            }
-            if (type === "satelite") {
-                this.tileLayer.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}")
-            }
-            else {
-                this.tileLayer.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
-            }
-        },
-        initMap() {
-            // view controls custom
-            const map = L.map('map-target', {
-                // attributionControl: false,
-                zoomControl: false,
-                // zoomAnimation:false,
-                fadeAnimation: true,
-                markerZoomAnimation: true
-                // renderer: L.canvas(),
-            });
-
-            this.changeMapType(this.settings.mapType ?? "street", map)
-            this.changeCluster(false, map, true)
-
             map.setMaxZoom(18);
             map.setMinZoom(3);
             // load trigger
             map.on("load", () => {
                 setTimeout(() => {
+                    // update map size
                     map.invalidateSize()
                     this.loaded = true
                     this.$emit("map-loaded", {
                         moveCenter: this.moveCenter,
+                        select: this.select
                     })
                 }, 50)
                 this.map = map
@@ -345,7 +379,7 @@ export default {
                     return container;
                 }
             })
-
+            // factory for view controls
             L.control.viewControls = function (options) {
                 return new L.Control.ViewControls(options);
             }
@@ -367,7 +401,7 @@ export default {
                     return container;
                 }
             })
-
+            // factory function settings button
             L.control.settings = function (options) {
                 return new L.Control.Settings(options);
             }
@@ -378,7 +412,7 @@ export default {
             map.setView(this.center, 13)
         },
         moveCenter(lat, lng) {
-            this.map.setView([lat, lng], 6)
+            this.map.setView(L.latLng(lat, lng), 12)
             this.center = [lat, lng]
         },
         // return bounding box of all viewable devices
@@ -471,6 +505,8 @@ export default {
     position: relative;
     display: grid;
     place-items: center;
+    width: 100%;
+    height: 100%;
 }
 
 .device-label-anchor {
@@ -548,15 +584,16 @@ export default {
     box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12);
     background: white;
     padding: 12px 10px;
-    z-index: 20;
+    z-index: 10000;
     display: flex;
+    border-radius: 4px;
     flex-direction: column;
 }
 
-.settings-header {
+.setting-header {
     position: relative;
-    padding: "0.2rem 0.4rem";
-    font-size: 0.8rem;
+    padding: 0.2rem 0.2rem 0.6rem;
+    font-size: 1.35rem;
     font-weight: bold;
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
@@ -571,5 +608,21 @@ export default {
     font-weight: bold;
     text-align: right;
     cursor: pointer;
+    transition: all 0.2s ease-in;
+}
+
+.close:hover {
+    color: rgb(25, 118, 210);
+}
+.device-icon-selected {
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(114, 114, 114, .55);
+    border-radius: 100%;
+    width: 45px;
+    height: 45px;
 }
 </style>

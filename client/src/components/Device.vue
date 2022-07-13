@@ -4,7 +4,7 @@
         <div class="device-inner">
             <div class="device-main-info">
                 <div class="device-display-name">
-                    {{ device.display_name }}
+                    {{ settings.displayName }}
                 </div>
                 <div class="device-status">
                     {{ (device.online ? driveStates[device.drive_status] : "No signal") + ' ' +
@@ -17,8 +17,17 @@
                     <span>{{ device.speed + " mph" }}</span>
                 </div>
                 <div class="buttons">
-                    <span>a</span>
-                    <div>b</div>
+                    <IconButton :icon="'settings'" :onClick="() => {
+                        $emit('edit', device)
+                    }" />
+                    <IconButton :icon="settings.visible ? 'visibility' : 'visibility_off'" :onClick="() => {
+                        updateSettings({
+                            visible: !settings.visible
+                        })
+                    }" />
+                    <IconButton :icon="'my_location'" :onClick="() => {
+                        $emit('locate', device)
+                    }" />
                 </div>
             </div>
         </div>
@@ -27,11 +36,13 @@
 
 <script>
 // import { CustomInput } from './CustomInput.vue'
-import { dateFormatter } from '../helpers'
+import IconButton from './IconButton.vue'
+import { dateFormatter, PreferenceHolder } from '../helpers'
 
 export default {
     name: "DeviceComponent",
     components: {
+        IconButton
         // CustomInput,
     },
     props: {
@@ -53,6 +64,11 @@ export default {
                 driving: "Driving",
                 idle: "Idle",
             },
+            // preference map
+            settings: PreferenceHolder.get()?.deviceSettings?.[this.device.device_id] || {
+                visible: true,
+                displayName: this.device.display_name,
+            },
         }
     },
     methods: {
@@ -61,6 +77,24 @@ export default {
 
             return dateFormatter(date.valueOf() / 1000)
         },
+        updateSettings(settings) {
+            let safe
+            if (settings.isPref__) {
+                settings = settings?.deviceSettings?.[this.device.device_id] ?? {}
+            }
+            else safe = true
+            this.settings = {
+                ...this.settings,
+                ...settings,
+            }
+            // prevent infinite loop
+            if (safe) PreferenceHolder.set({
+                deviceSettings: {
+                    ...PreferenceHolder.get()?.deviceSettings ?? {},
+                    [this.device.device_id]: this.settings,
+                },
+            }, this.updateSettings)
+        },
     }
 }
 </script>
@@ -68,14 +102,16 @@ export default {
 <style>
 .device-container {
     flex: 1;
-    height: auto;
+    height: 70px;
     display: flex;
     position: relative;
     align-items: center;
     flex-direction: row;
     box-sizing: border-box;
-    padding: 10px 14px;
+    padding: 0 14px;
     border-bottom: 1px solid rgba(0, 0, 0, .12);
+    background-color: v-bind("settings.visible ? 'transparent' : 'rgba(155, 155, 155, .1)'");
+    transition: all .2s ease-in;
 }
 
 .device-sidebar {
@@ -127,11 +163,19 @@ export default {
     font-weight: 400;
     color: rgba(0, 0, 0, .84);
     margin-bottom: 5px;
+    text-align: center;
 }
 .device-left {
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 100%;
+    flex-direction: column;
+}
+.device-right {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
     height: 100%;
     flex-direction: column;
 }

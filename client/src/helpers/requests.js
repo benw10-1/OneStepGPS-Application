@@ -60,7 +60,7 @@ async function signup(Name, Password) {
 }
 
 async function getDevices() {
-    const key = Auth.getProfile().APIKey;
+    const key = Auth.getProfile()?.APIKey;
     if (!key) return Promise.reject('No API key');
 
     const url = HOST_URL + 'api/getDevices';
@@ -104,12 +104,16 @@ async function setAPIKey(key) {
 }
 
 async function getPreferences() {
+    const key = Auth.getProfile()?.APIKey;
+    if (!key) return Promise.reject('No API key');
     const url = HOST_URL + 'api/preferences';
 
     return base(url);
 }
 
 async function setPreferences(prefs) {
+    const key = Auth.getProfile()?.APIKey;
+    if (!key) return Promise.reject('No API key');
     const url = HOST_URL + 'api/preferences';
 
     return base(url, {

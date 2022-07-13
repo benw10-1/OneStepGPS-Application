@@ -222,7 +222,6 @@ export default {
     box-sizing: border-box;
     margin: 0;
     cursor: text;
-    position: relative;
 }
 
 .input-container input {
@@ -235,6 +234,7 @@ export default {
     font-weight: v-bind(inputFontWeight);
     color: v-bind(inputColor);
     background-color: transparent;
+    left: .65em;
     top: 50%;
     transform: translateY(-50%);
     margin: 0;

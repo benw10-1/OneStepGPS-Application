@@ -14,7 +14,8 @@
       </div>
     </div>
     <div class="devices-container">
-      <DeviceComponent v-for="device of display" :device="device" v-bind:key="device.device_id" />
+      <DeviceComponent v-for="device of display" :device="device" v-bind:key="device.device_id" @edit="editDevice"
+        @locate="locateDevice" />
     </div>
   </div>
 </template>
@@ -36,6 +37,16 @@ export default {
   unmounted() {
     Holder.removeUpdate(this.updateDevices)
   },
+  props: {
+    setMapCenter: {
+      type: Function,
+      default: null
+    },
+    select: {
+      type: Function,
+      default: null
+    },
+  },
   data() {
     return {
       // all devices
@@ -44,9 +55,19 @@ export default {
       // filtered devices to display
       display: [],
       firstLoad: true,
+      editingDevice: false,
     }
   },
   methods: {
+    editDevice(device) {
+      this.editingDevice = device
+    },
+    stopEditing() {
+      this.editingDevice = false
+    },
+    locateDevice(device) {
+      if (this.select) this.select(device)
+    },
     updateDevices(data) {
       if (!data) return
       // create copy of array to always trigger rerender

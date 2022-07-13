@@ -4,8 +4,8 @@
             <div class="banner"></div>
             <div class="loader" style="margin-top: 30px"></div>
         </div>
-        <SideBar @loaded="() => {setSideLoad(true)}" />
-        <MapComponent @map-loaded="() => {setMapLoad(true)}" />
+        <SideBar @loaded="() => {setSideLoad(true)}" :set-map-center="mapBridge.moveCenter" :select="mapBridge.select" />
+        <MapComponent @map-loaded="(obj) => {setMapLoad(true); setMapBridge(obj)}" />
     </div>
 </template>
 
@@ -29,6 +29,7 @@ export default {
             sideLoaded: false,
             mapLoaded: false,
             actualLoaded: false,
+            mapBridge: {},
         }
     },
     methods: {
@@ -47,6 +48,9 @@ export default {
                     this.actualLoaded = true
                 }, 500)
             }
+        },
+        setMapBridge(bridge) {
+            this.mapBridge = bridge
         },
     }
 }

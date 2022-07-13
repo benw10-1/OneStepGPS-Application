@@ -1,5 +1,4 @@
 import { Requests } from ".";
-import Dummy from "../dummy/data.json";
 import { apiStore } from "../stores";
 
 function Holder () {
@@ -12,10 +11,8 @@ function Holder () {
             data = await Requests.getDevices();
         }
         catch (err) {
-            console.log(err)
-            data = Dummy;
+            return
         }
-        data = data || Dummy;
         data = data?.result_list ?? data ?? [];
         // call all update functions with data
         for (const func of updateFuncs) {
@@ -28,7 +25,7 @@ function Holder () {
     // add update function
     function onUpdate(callback) {
         if (typeof callback !== 'function') return -1
-        callback(data);
+        if (data) callback(data);
         updateFuncs.push(callback);
 
         return updateFuncs.length - 1;
@@ -45,7 +42,6 @@ function Holder () {
     }
 
     function manualUpdate(data) {
-        data = data || Dummy;
         data = data?.result_list ?? data ?? [];
         // call all update functions with data
         for (const func of updateFuncs) {
