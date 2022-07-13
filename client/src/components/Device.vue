@@ -51,6 +51,12 @@ export default {
             required: true,
         }
     },
+    mounted() {
+        PreferenceHolder.onUpdate(this.updateSettings)
+    },
+    unmounted() {
+        PreferenceHolder.removeUpdate(this.updateSettings)
+    },
     data() {
         return {
             colors: {
@@ -78,8 +84,8 @@ export default {
             return dateFormatter(date.valueOf() / 1000)
         },
         updateSettings(settings) {
-            let safe
-            if (settings.isPref__) {
+            let safe = false
+            if (settings.isPrefs__) {
                 settings = settings?.deviceSettings?.[this.device.device_id] ?? {}
             }
             else safe = true

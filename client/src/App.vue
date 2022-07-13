@@ -1,7 +1,9 @@
 <template>
   <div class="container">
-    <DashBoard v-if="loggedIn" />
-    <LogIn v-else />
+    <Transition>
+      <DashBoard v-if="loggedIn" />
+      <LogIn v-else />
+    </Transition>
   </div>
 </template>
 
@@ -56,11 +58,22 @@ body {
   text-rendering: optimizeLegibility; */
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
 }
 
 .container {
   height: 100%;
   width: 100%;
   background-color: #f5f5f5;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.2s ease-in;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>

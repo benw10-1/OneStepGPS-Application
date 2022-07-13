@@ -1,16 +1,19 @@
 <template>
     <div class="dashboard-page">
-        <div v-if="!actualLoaded" class="loading-panel">
-            <div class="banner"></div>
-            <div class="loader" style="margin-top: 30px"></div>
-        </div>
-        <SideBar @loaded="() => {setSideLoad(true)}" :set-map-center="mapBridge.moveCenter" :select="mapBridge.select" />
-        <MapComponent @map-loaded="(obj) => {setMapLoad(true); setMapBridge(obj)}" />
+        <Transition>
+            <div v-if="!actualLoaded" class="loading-panel">
+                <div class="banner"></div>
+                <div class="loader" style="margin-top: 30px"></div>
+            </div>
+        </Transition>
+        <SideBar @loaded="() => { setSideLoad(true) }" :set-map-center="mapBridge.moveCenter"
+            :select="mapBridge.select" />
+        <MapComponent @map-loaded="(obj) => { setMapLoad(true); setMapBridge(obj) }" />
     </div>
 </template>
 
 <script setup>
-    document.title = "Dashboard"
+document.title = "Dashboard"
 </script>
 
 <script>
@@ -62,6 +65,7 @@ export default {
     height: 100%;
     display: flex;
 }
+
 .loading-panel {
     position: absolute;
     top: 0;
@@ -83,16 +87,21 @@ export default {
 }
 
 .loader {
-  border: 10px solid #f5f5f5; 
-  border-top: 10px solid rgb(25, 118, 210);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 2s linear infinite;
+    border: 10px solid #f5f5f5;
+    border-top: 10px solid rgb(25, 118, 210);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 </style>

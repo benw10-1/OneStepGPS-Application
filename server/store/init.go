@@ -40,6 +40,7 @@ type JSONStructor interface {
 	GetPreferences(name string) map[string]string
 	CorrectCredentials(name string, password string) bool
 	GetDevices(name string) string
+	ReverseGeocode(name string, lat string, lon string) string
 }
 
 // Indirectly implement the GetUsers method
@@ -53,6 +54,32 @@ func (x *JSONStruct) GetDevices(name string) string {
 	for _, user := range x.GetUsers() {
 		if user.Name == name {
 			requestURL := "https://track.onestepgps.com/v3/api/public/device?latest_point=true&api-key=" + user.APIKey
+
+			req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+			if err != nil {
+				return "Error making request"
+			}
+
+			res, err := http.DefaultClient.Do(req)
+			if err != nil {
+				return "Error making request"
+			}
+
+			resBody, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				return "Could not read response"
+			}
+			return string(resBody)
+		}
+	}
+	return ""
+}
+
+func (x *JSONStruct) ReverseGeocode(name string, lat string, lon string) string {
+	// Get the user
+	for _, user := range x.GetUsers() {
+		if user.Name == name {
+			requestURL := "https://track.onestepgps.com/v3/api/public/reverse-geocode?lat_lng=" + lat + "%2C" + lon + "&api-key=" + user.APIKey
 
 			req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 			if err != nil {

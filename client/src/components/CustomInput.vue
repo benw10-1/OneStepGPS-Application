@@ -10,7 +10,7 @@
                     v-on:input="(e) => { onChange_(e.currentTarget.value) }" v-bind:placeholder="placeholder"
                     v-bind:disabled="disabled" v-bind:autocorrect="autocomplete" v-bind:autocapitalize="autocomplete"
                     v-bind:spellcheck="autocomplete" v-bind:autocomplete="autocomplete" ref="input" v-on:blur="unfocus_"
-                    v-on:focus="focus_" />
+                    v-on:focus="focus_" v-on:keypress="(e) => { if(e.key === 'Enter') unfocus_() }"/>
                 <div class="error-message" v-if="error_">
                     <span>{{ error_ }}</span>
                 </div>
@@ -159,6 +159,8 @@ export default {
             this.focused = true
         },
         unfocus_() {
+            this.$emit('blur', this.value_)
+            this.$refs.input.blur()
             this.focused = false
         },
         // trigger rerender when mouse enters or leaves visible div

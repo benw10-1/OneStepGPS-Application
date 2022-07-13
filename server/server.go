@@ -15,6 +15,7 @@ func main() {
 	http.HandleFunc("/api/preferences", handlers.Preferences)
 	http.HandleFunc("/api/setAPIKey", handlers.SetAPIKey)
 	http.HandleFunc("/api/getDevices", handlers.GetDevices)
+	http.HandleFunc("/api/ReverseGeocode", handlers.GetDevices)
 
 	// start server
 	fs := http.FileServer(http.Dir("../client/dist"))

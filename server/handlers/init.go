@@ -201,6 +201,40 @@ func GetDevices(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(devices))
 }
 
+func ReverseGeocode(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, `"Method not allowed"`, http.StatusMethodNotAllowed)
+		return
+	}
+	Headers(w)
+	// guard clause
+	if r.Header.Get("Authorization") == "" || len(r.Header.Get("Authorization")) < 8 {
+		http.Error(w, "No authorization header", http.StatusUnauthorized)
+		return
+	}
+	// get token from header
+	token := r.Header.Get("Authorization")[7:]
+	// verify token and get user
+	user, err := auth.Validate(token)
+
+	if err != nil {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		http.Error(w, `"Error reading request body"`, http.StatusInternalServerError)
+	}
+	// unmarshal body into data
+	var data map[string]string
+	err = json.Unmarshal(body, &data)
+	// get devices
+	lookup := jsonStruct.ReverseGeocode(user.Name, data["lat"], data["lon"])
+
+	w.Write([]byte(lookup))
+}
+
 // Need to be logged in to view or alter preferences
 func Preferences(w http.ResponseWriter, r *http.Request) {
 	Headers(w)

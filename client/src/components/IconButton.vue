@@ -1,6 +1,7 @@
 <template>
     <div class="icon-container">
-        <div class="icon-button" @mousedown="onMouseDown" @mouseup="onMouseUp" v-on:mouseenter="onMouseEnter" v-on:mouseleave="onMouseLeave" >
+        <div class="icon-button" @mousedown="onMouseDown" @mouseup="onMouseUp" v-on:mouseenter="onMouseEnter"
+            v-on:mouseleave="onMouseLeave" @click="e => { e.preventDefault(); e.stopPropagation() }">
             <span class="material-icons-outlined">
                 {{ icon }}
             </span>
@@ -67,6 +68,7 @@ export default {
     background-color: v-bind("(hover && !clicked) ? colors.hoverBG : 'transparent'");
     transition: v-bind("clicked ? 'none' : 'all .2s ease-in'");
 }
+
 .icon-button {
     width: 100%;
     height: 100%;
@@ -75,8 +77,8 @@ export default {
     align-items: center;
     border-radius: 100%;
     background-color: transparent;
-    color: v-bind("hover ? colors.hover : colors.normal");
-    transition: all .2s ease-in;
+    color: v-bind("(hover && !clicked) ? colors.hover : colors.normal");
+    transition: v-bind("clicked ? 'none' : 'all .2s ease-in'");
     user-select: none;
 }
 </style>

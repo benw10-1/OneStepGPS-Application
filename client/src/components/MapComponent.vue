@@ -1,37 +1,40 @@
 <template>
     <div class="map-container">
-        <div class="settings-panel" v-if="showSettings">
-            <div class="setting-header">
-                <span>Map Settings</span>
-                <span class="close material-icons-outlined" @click="hideSettingsPanel">
-                    close
-                </span>
+        <Transition>
+            <div class="settings-panel" v-if="showSettings">
+                <div class="setting-header">
+                    <span>Map Settings</span>
+                    <span class="close material-icons-outlined" @click="hideSettingsPanel">
+                        close
+                    </span>
+                </div>
+                <div class="settings-container">
+                    <SwitchSetting :initial="settings.mapDisplay === 'STREET' ? 1 : 0" text="Map Display"
+                        :switch-array="['SATELITE', 'STREET']" :onChange="(change) => {
+                            updateSettings({
+                                mapDisplay: change
+                            })
+                        }" />
+                </div>
+                <div class="settings-container">
+                    <SwitchSetting :initial="settings.showLabels ? 0 : 1" text="Labels" :switch-array="['SHOW', 'HIDE']"
+                        :onChange="(change) => { updateSettings({ showLabels: change.toLowerCase() === 'show' }) }" />
+                </div>
+                <div class="settings-container">
+                    <SwitchSetting :initial="settings.cluster ? 0 : 1" text="Cluster"
+                        :switch-array="['CLUSTER', 'NONE']"
+                        :onChange="(change) => { updateSettings({ cluster: change?.toLowerCase() === 'cluster' }) }" />
+                </div>
+                <div class="setting-header">
+                    <span>User Settings</span>
+                </div>
+                <div class="settings-container">
+                    <SwitchSetting text="Logout" :switch-array="['logout']" :onChange="(change) => {
+                        logout()
+                    }" :is-icon="true" />
+                </div>
             </div>
-            <div class="settings-container">
-                <SwitchSetting :initial="settings.mapDisplay === 'STREET' ? 1 : 0" text="Map Display"
-                    :switch-array="['SATELITE', 'STREET']" :onChange="(change) => {
-                        updateSettings({
-                            mapDisplay: change
-                        })
-                    }" />
-            </div>
-            <div class="settings-container">
-                <SwitchSetting :initial="settings.showLabels ? 0 : 1" text="Labels" :switch-array="['SHOW', 'HIDE']"
-                    :onChange="(change) => { updateSettings({ showLabels: change.toLowerCase() === 'show' }) }" />
-            </div>
-            <div class="settings-container">
-                <SwitchSetting :initial="settings.cluster ? 0 : 1" text="Cluster" :switch-array="['CLUSTER', 'NONE']"
-                    :onChange="(change) => { updateSettings({ cluster: change?.toLowerCase() === 'cluster' }) }" />
-            </div>
-            <div class="setting-header">
-                <span>User Settings</span>
-            </div>
-            <div class="settings-container">
-                <SwitchSetting text="Logout" :switch-array="['logout']" :onChange="(change) => {
-                    logout()
-                }" :is-icon="true" />
-            </div>
-        </div>
+        </Transition>
         <div id="map-target"></div>
     </div>
 </template>
@@ -173,7 +176,7 @@ export default {
                             // props passed to marker so that we can access them later
                             properties: {
                                 device_id: device.device_id ?? i,
-                                display_name: prefs[device.device_id]?.display_name ?? device.display_name,
+                                display_name: prefs[device.device_id]?.displayName ?? device.display_name,
                                 drive_status: device.drive_status,
                                 drive_status_begin_time: device.drive_status_begin_time,
                                 heading: device.heading,
@@ -614,6 +617,7 @@ export default {
 .close:hover {
     color: rgb(25, 118, 210);
 }
+
 .device-icon-selected {
     position: absolute;
     z-index: -1;

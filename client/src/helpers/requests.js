@@ -122,4 +122,23 @@ async function setPreferences(prefs) {
     });
 }
 
-export default { getDevices, base, login, signup, setAPIKey, getPreferences, setPreferences };
+async function reverseGeocode(lat, lng) {
+    const url = HOST_URL + 'api/reverseGeocode';
+
+    return base(url, {
+        method: 'POST',
+        body: JSON.stringify({
+            lat,
+            lon: lng
+        })
+    }).then(data => {
+        if (!data) return Promise.reject('No data');
+        return {
+            lat: data.lat,
+            lng: data.lng,
+            address: data.formatted_address
+        };
+    })
+}
+
+export default { getDevices, base, login, signup, setAPIKey, getPreferences, setPreferences, reverseGeocode };
