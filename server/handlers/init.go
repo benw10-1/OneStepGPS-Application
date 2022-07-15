@@ -192,7 +192,7 @@ func Preferences(c *gin.Context) {
 
 	if c.Request.Method == "GET" {
 		preferences := jsonStruct.GetPreferences(cleaned.Name)
-
+		fmt.Println(preferences)
 		c.JSON(200, gin.H{
 			"result": preferences,
 		})

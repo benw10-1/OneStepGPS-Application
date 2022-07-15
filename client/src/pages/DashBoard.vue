@@ -20,6 +20,7 @@ document.title = "Dashboard"
 import SideBar from '../components/SideBar.vue'
 import MapComponent from '../components/MapComponent.vue'
 import "../assets/one-step.png"
+import { PreferenceHolder } from '@/helpers';
 
 export default {
     name: 'DashBoard',
@@ -32,6 +33,7 @@ export default {
             sideLoaded: false,
             mapLoaded: false,
             actualLoaded: false,
+            prefLoad: false,
             mapBridge: {},
         }
     },
@@ -55,7 +57,12 @@ export default {
         setMapBridge(bridge) {
             this.mapBridge = bridge
         },
-    }
+    },
+    mounted() {
+        PreferenceHolder.preferenceReq().then(() => {
+            this.prefLoad = true
+        })
+    },
 }
 </script>
 

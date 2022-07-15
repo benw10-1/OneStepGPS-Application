@@ -41,18 +41,20 @@ function PrefHolder () {
         return data;
     }
 
-    Requests.getPreferences().then(data_ => {
-        console.log(data_)
-        if (!data_) return
-        data = { ...data, ...data_ };
-        updateFuncs.forEach(func => func(data));
-    })
+    async function preferenceReq() {
+        return Requests.getPreferences().then(data_ => {
+            if (!data_) return
+            data = { ...data, ...data_ };
+            updateFuncs.forEach(func => func(data));
+        });
+    }
 
     return {
         get,
         set,
         onUpdate,
         removeUpdate,
+        preferenceReq
     }
 }
 

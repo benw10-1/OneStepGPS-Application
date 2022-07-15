@@ -12,6 +12,8 @@ export default {
         // If there is a token and it's not expired, return `true`
         return token && !this.isTokenExpired(token)
     },
+    loginFuncs: [],
+    logoutFuncs: [],
     isTokenExpired(token) {
         // Decode the token to get its expiration time that was set by the server
         const decoded = decode(token)
@@ -33,17 +35,17 @@ export default {
         if (this.onLogin) {
             const prof = this.getProfile(idToken)
 
-            this.onLogin(prof)
+            this.loginFuncs.forEach(func => func(prof))
         }
     },
     logout() {
         localStorage.removeItem('id_token')
-        if (this.onLogout) this.onLogout()
+        this.logoutFuncs.forEach(func => func())
     },
     onLogin(callback) {
-        this.onLogin = callback
+        this.loginFuncs.push(callback)
     },
     onLogout(callback) {
-        this.onLogout = callback
+        this.logoutFuncs.push(callback)
     }
 }

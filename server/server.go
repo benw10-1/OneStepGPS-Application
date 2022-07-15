@@ -17,6 +17,9 @@ func main() {
 
 	router.Use(static.Serve("/", static.LocalFile("../client/dist", true)))
 
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.File("../client/dist/favicon.ico")
+	})
 	router.POST("/api/login", handlers.Login)
 	router.POST("/api/signup", handlers.SignUp)
 	router.GET("/api/devices", handlers.GetDevices)
