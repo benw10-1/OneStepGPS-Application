@@ -146,7 +146,10 @@ export default {
         },
         // main update method
         updateDevices(data) {
-            if (!data) return
+            if (!data.length) {
+                this.first = true
+                return
+            }
             // create copy of array to always trigger rerender
             this.devices = data instanceof Array ? [...data] : { ...data }
             const prefs = PreferenceHolder.get()?.deviceSettings ?? {}
@@ -334,6 +337,7 @@ export default {
                         moveCenter: this.moveCenter,
                         select: this.select
                     })
+                    this.updateDevices(this.devices)
                 }, 50)
                 this.map = map
             })
