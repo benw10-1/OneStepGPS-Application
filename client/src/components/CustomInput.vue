@@ -179,6 +179,11 @@ export default {
             error_: this.error,
         }
     },
+    watch: {
+        error(data) {
+            this.error_ = data
+        }
+    },
 }
 </script>
 
@@ -230,7 +235,7 @@ export default {
     position: absolute;
     outline: none;
     border: none;
-    flex: 1;
+    width: calc(100% - 1.3em);
     height: 100%;
     font-size: v-bind(inputFontSize);
     font-weight: v-bind(inputFontWeight);

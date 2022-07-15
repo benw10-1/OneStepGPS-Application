@@ -11,17 +11,21 @@
                 </div>
                 <div class="login-form-body" v-on:keydown="(e) => { if (e.key === 'Enter') login() }">
                     <div v-if="keySwitch" class="login-form-input">
-                        <CustomInput placeholder="376529419055430ab4f3056b01e61fc6" label="API Key" :value="APIKey" :onChange="setAPIKey" :required="true" flexItem />
+                        <CustomInput placeholder="376529419055430ab4f3056b01e61fc6" label="API Key" :value="APIKey"
+                            :onChange="setAPIKey" :required="true" flexItem />
                     </div>
                     <div v-else class="login-form-input">
-                        <CustomInput placeholder="JohnDoe77" label="Username" :value="Name" :onChange="setName" :required="true" flexItem />
-                        <CustomInput placeholder="Password" label="Password" :value="Password" :onChange="setPass" :required="true" type="password" flexItem />
+                        <CustomInput placeholder="JohnDoe77" label="Username" :value="Name" :onChange="setName"
+                            :required="true" flexItem :error="Error" />
+                        <CustomInput placeholder="Password" label="Password" :value="Password" :onChange="setPass"
+                            :required="true" type="password" flexItem :error="switch_ ? '' : Error" />
                     </div>
                     <div class="login-form-submit" v-if="!keySwitch">
                         <span v-on:click="other" class="login-form-switch">
                             {{ switch_ ? "Already have an account?" : "Don't have an account?" }}
                         </span>
-                        <CustomButton padding="10px 14px" width="100px" :value="keySwitch ? 'Submit' : (switch_ ? 'SIGNUP' : 'LOGIN')" :onClick="login" />
+                        <CustomButton padding="10px 14px" width="100px"
+                            :value="keySwitch ? 'Submit' : (switch_ ? 'SIGNUP' : 'LOGIN')" :onClick="login" />
                     </div>
                 </div>
             </div>
@@ -30,7 +34,7 @@
 </template>
 
 <script setup>
-    document.title = "Login"
+document.title = "Login"
 </script>
 
 <script>
@@ -76,7 +80,7 @@ export default {
                         await Requests.login(this.Name, this.Password))
                 // rerender with error if there is one
                 if (!data?.Token) {
-                    this.Error = "Invalid username or password"
+                    this.Error = this.switch_ ? "Username already taken" : "Invalid username or password"
                     return
                 }
                 // need to set API key
@@ -87,6 +91,7 @@ export default {
             // switch between login and signup
             this.switch_ = !this.switch_
             this.Password = ''
+            this.Error = ''
             this.keySwitch = false
         },
         setName(name) {
@@ -156,28 +161,33 @@ export default {
     display: flex;
     box-sizing: border-box;
 }
+
 .login-inner {
     flex: 1;
     display: flex;
     flex-direction: column;
 }
+
 .login-form-body {
     display: flex;
     flex-direction: column;
     flex: 1
 }
+
 .login-form-input {
     display: flex;
     flex-direction: column;
     flex: 1;
     justify-content: center;
 }
+
 .login-form-submit {
     display: flex;
     flex-direction: row;
     justify-content: v-bind("collapsed ? 'space-around' : 'flex-end'");
     align-items: center;
 }
+
 .login-form-switch {
     margin-right: v-bind("collapsed ? '0' : '16px'");
     font-size: 1rem;
@@ -187,5 +197,6 @@ export default {
     color: #3366BB;
     text-decoration: underline;
     cursor: pointer;
+    user-select: none;
 }
 </style>

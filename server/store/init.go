@@ -3,6 +3,7 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -51,8 +52,12 @@ func (x *JSONStruct) GetUsers() []User {
 // API proxy (no CORS on the server)
 func (x *JSONStruct) GetDevices(name string) string {
 	// Get the user
+	fmt.Println("Getting devices for user: " + name)
 	for _, user := range x.GetUsers() {
 		if user.Name == name {
+			if user.APIKey == "" {
+				return "No API key"
+			}
 			requestURL := "https://track.onestepgps.com/v3/api/public/device?latest_point=true&api-key=" + user.APIKey
 
 			req, err := http.NewRequest(http.MethodGet, requestURL, nil)
@@ -79,6 +84,9 @@ func (x *JSONStruct) ReverseGeocode(name string, lat string, lon string) string 
 	// Get the user
 	for _, user := range x.GetUsers() {
 		if user.Name == name {
+			if user.APIKey == "" {
+				return "No API key"
+			}
 			requestURL := "https://track.onestepgps.com/v3/api/public/reverse-geocode?lat_lng=" + lat + "%2C" + lon + "&api-key=" + user.APIKey
 
 			req, err := http.NewRequest(http.MethodGet, requestURL, nil)

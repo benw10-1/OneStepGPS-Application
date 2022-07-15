@@ -25,7 +25,7 @@
                             visible: !settings.visible
                         })
                     }" />
-                    <IconButton :icon="'my_location'" :onClick="() => {
+                    <IconButton :icon="'my_location'" :disabled="!settings.visible" :onClick="() => {
                         $emit('locate', device)
                     }" />
                 </div>
@@ -49,7 +49,7 @@ export default {
         device: {
             type: Object,
             required: true,
-        }
+        },
     },
     mounted() {
         PreferenceHolder.onUpdate(this.updateSettings)

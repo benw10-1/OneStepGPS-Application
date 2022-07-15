@@ -2,28 +2,32 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"server/auth"
 	. "server/config"
 	"server/handlers"
+
+	"github.com/gin-contrib/static"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	port := GetEnv("PORT", "3000")
-	// set up handlers
-	http.HandleFunc("/api/login", handlers.Login)
-	http.HandleFunc("/api/signup", handlers.SignUp)
-	http.HandleFunc("/api/preferences", handlers.Preferences)
-	http.HandleFunc("/api/setAPIKey", handlers.SetAPIKey)
-	http.HandleFunc("/api/getDevices", handlers.GetDevices)
-	http.HandleFunc("/api/ReverseGeocode", handlers.GetDevices)
+	router := gin.Default()
+	router.Use(auth.AuthMiddleWare())
 
-	// start server
-	fs := http.FileServer(http.Dir("../client/dist"))
-	http.Handle("/", fs)
-	log.Print("Listening on : " + port + "...")
-	err := http.ListenAndServe(":"+port, nil)
+	router.Use(static.Serve("/", static.LocalFile("../client/dist", true)))
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	router.POST("/api/login", handlers.Login)
+	router.POST("/api/signup", handlers.SignUp)
+	router.GET("/api/devices", handlers.GetDevices)
+	router.POST("/api/setAPIKey", handlers.SetAPIKey)
+	router.GET("/api/preferences", handlers.Preferences)
+	router.POST("/api/preferences", handlers.Preferences)
+	router.POST("/api/reverseGeocode", handlers.ReverseGeocode)
+
+	router.NoRoute(func(c *gin.Context) {
+		c.Redirect(302, "/")
+	})
+
+	log.Fatal(router.Run(":" + port))
 }

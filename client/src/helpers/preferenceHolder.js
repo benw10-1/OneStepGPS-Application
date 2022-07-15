@@ -42,6 +42,7 @@ function PrefHolder () {
     }
 
     Requests.getPreferences().then(data_ => {
+        console.log(data_)
         if (!data_) return
         data = { ...data, ...data_ };
         updateFuncs.forEach(func => func(data));

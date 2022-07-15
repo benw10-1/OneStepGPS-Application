@@ -96,6 +96,7 @@ export default {
             settings: PreferenceHolder.get().mapSettings ?? {
                 showLabels: true,
                 cluster: true,
+                mapDisplay: 'street',
             },
             selected: null,
         }
@@ -201,7 +202,7 @@ export default {
                 safe = true
             }
             if (this.settings !== settings.cluster && settings.cluster !== undefined) this.changeCluster(settings.cluster)
-            this.changeMapType(settings.mapDisplay?.toLowerCase() ?? "street")
+            if (settings.mapDisplay) this.changeMapType(settings.mapDisplay?.toLowerCase() ?? "street")
             this.settings = {
                 ...this.settings,
                 ...settings,
@@ -236,7 +237,7 @@ export default {
                 // renderer: L.canvas(),
             });
 
-            this.changeMapType(this.settings.mapType ?? "street", map)
+            this.changeMapType(this.settings.mapDisplay ?? "street", map)
             this.changeCluster(this.settings.cluster, map)
 
             this.geoJSON = L.geoJSON(null, {

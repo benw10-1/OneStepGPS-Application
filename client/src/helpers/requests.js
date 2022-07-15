@@ -19,7 +19,12 @@ async function base(url, override={}) {
         ...override
     }
 
-    return fetch(url, options).then(res => res.json()).catch(err => {
+    return fetch(url, options).then(res => res.json()).then(data => {
+        if (data["error"]) {
+            return Promise.reject(data["error"]);
+        }
+        return data["result"];
+    }).catch(err => {
         console.log(err, url);
         return false;
     });
@@ -63,7 +68,7 @@ async function getDevices() {
     const key = Auth.getProfile()?.APIKey;
     if (!key) return Promise.reject('No API key');
 
-    const url = HOST_URL + 'api/getDevices';
+    const url = HOST_URL + 'api/devices';
 
     return base(url).then(data => {
         if (!data) return Promise.reject('No data');

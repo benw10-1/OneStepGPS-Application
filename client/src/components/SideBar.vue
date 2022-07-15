@@ -9,9 +9,6 @@
           </span>
         </CustomInput>
       </div>
-      <div class="">
-
-      </div>
     </div>
     <div class="devices-container">
       <DeviceComponent v-for="device of display" :device="device" v-bind:key="device.device_id" @edit="editDevice"

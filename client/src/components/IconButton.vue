@@ -26,12 +26,17 @@ export default {
             type: Function,
             required: true,
         },
+        disabled: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
             colors: {
                 hover: "rgb(25, 118, 210)",
                 normal: "rgba(0, 0, 0, .66)",
+                disabled: "rgba(0, 0, 0, .33)",
                 hoverBG: "rgba(0, 0, 0, .1)",
             },
             hover: false,
@@ -50,7 +55,7 @@ export default {
         },
         onMouseUp() {
             this.clicked = false
-            this.onClick()
+            if (!this.disabled) this.onClick()
         },
     }
 }
@@ -63,9 +68,9 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
+    cursor: v-bind("disabled ? 'default' : 'pointer'");
     border-radius: 100%;
-    background-color: v-bind("(hover && !clicked) ? colors.hoverBG : 'transparent'");
+    background-color: v-bind("(hover && !clicked && !disabled) ? colors.hoverBG : 'transparent'");
     transition: v-bind("clicked ? 'none' : 'all .2s ease-in'");
 }
 
@@ -77,7 +82,7 @@ export default {
     align-items: center;
     border-radius: 100%;
     background-color: transparent;
-    color: v-bind("(hover && !clicked) ? colors.hover : colors.normal");
+    color: v-bind("disabled ? colors.disabled : (hover && !clicked) ? colors.hover : colors.normal");
     transition: v-bind("clicked ? 'none' : 'all .2s ease-in'");
     user-select: none;
 }

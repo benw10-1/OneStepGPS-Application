@@ -4,10 +4,10 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"server/auth"
 	"server/store"
+
+	"github.com/gin-gonic/gin"
 )
 
 // User + token combo
@@ -26,263 +26,193 @@ type LoginStruct struct {
 var jsonStruct = store.Store.Get()
 var save = store.Store.Save
 
-// generic headers in-case more need to be set later
-func Headers(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-}
-
 // Auth constructor
-func SignAuth(user *store.CleanUser) []byte {
+func SignAuth(user *store.CleanUser) Auth {
 	token, err := auth.Sign(*user)
 	if err != nil {
 		fmt.Println(err)
-		return []byte("Error: " + err.Error())
-	}
-	auth := Auth{*user, token}
-	marshalled, err := json.Marshal(auth)
-
-	if err != nil {
-		fmt.Println(err)
-		return []byte("Error: " + err.Error())
+		return Auth{}
 	}
 
-	return marshalled
+	return Auth{*user, token}
 }
 
 // Login handler
-func Login(w http.ResponseWriter, r *http.Request) {
-	Headers(w)
-	// guard clause
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	// read body
-	resBody, err := ioutil.ReadAll(r.Body)
+func Login(c *gin.Context) {
+	var user LoginStruct
+	err := c.BindJSON(&user)
 
 	if err != nil {
-		fmt.Println(err)
-		w.Write([]byte("Error: " + err.Error()))
-		return
-	}
-
-	var login LoginStruct
-	// load JSON into login variable
-	err = json.Unmarshal(resBody, &login)
-
-	if err != nil {
-		fmt.Println(err)
-		w.Write([]byte("Error: " + err.Error()))
+		c.JSON(200, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 	// verify user
-	correct := jsonStruct.CorrectCredentials(login.Name, login.Password)
+	correct := jsonStruct.CorrectCredentials(user.Name, user.Password)
 
 	if !correct {
-		w.Write([]byte("Error: Incorrect username or password"))
+		c.JSON(200, gin.H{
+			"error": "Invalid username or password",
+		})
 		return
 	}
 
-	marshalled := SignAuth(jsonStruct.GetUser(login.Name))
-	fmt.Println(string(marshalled))
-	w.Write(marshalled)
+	c.JSON(200, gin.H{
+		"result": SignAuth(jsonStruct.GetUser(user.Name)),
+	})
 }
 
 // Add user handler (same logic as login)
-func SignUp(w http.ResponseWriter, r *http.Request) {
-	Headers(w)
-
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusInternalServerError)
-		return
-	}
-
+func SignUp(c *gin.Context) {
 	var user LoginStruct
-
-	err = json.Unmarshal(body, &user)
-
-	if err != nil {
-		http.Error(w, "Error parsing JSON", http.StatusInternalServerError)
-		return
-	}
-	// add user using meothod in store (returns false if user already exists)
-	userAdded := jsonStruct.AddUser(user.Name, user.Password, "")
-
-	if !userAdded {
-		http.Error(w, "User already exists", http.StatusConflict)
-		return
-	}
+	err := c.BindJSON(&user)
 
 	if err != nil {
-		fmt.Println(err)
-		w.Write([]byte("Error: " + err.Error()))
+		c.JSON(200, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
-	save()
-	marshalled := SignAuth(jsonStruct.GetUser(user.Name))
-
-	w.Write(marshalled)
-}
-
-func SetAPIKey(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	Headers(w)
-	// guard clause
-	if r.Header.Get("Authorization") == "" || len(r.Header.Get("Authorization")) < 8 {
-		http.Error(w, "No authorization header", http.StatusUnauthorized)
-		return
-	}
-	// get token from header
-	token := r.Header.Get("Authorization")[7:]
-	// verify token and get user
-	user, err := auth.Validate(token)
-
-	if err != nil {
-		http.Error(w, "Invalid token", http.StatusUnauthorized)
-		return
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		http.Error(w, `"Error reading request body"`, http.StatusInternalServerError)
-	}
-	// unmarshal body into data
-	var data map[string]string
-	err = json.Unmarshal(body, &data)
-
-	if err != nil {
-		http.Error(w, `"Error parsing JSON"`, http.StatusInternalServerError)
-		return
-	}
-
-	edited := jsonStruct.SetAPIKey(user.Name, data["key"])
-	// save user
+	// verify user
+	added := jsonStruct.AddUser(user.Name, user.Password, "")
 	save()
 
-	marshalled := SignAuth(edited)
+	if !added {
+		c.JSON(200, gin.H{
+			"error": "Username already exists",
+		})
+		return
+	}
 
-	w.Write(marshalled)
+	c.JSON(200, gin.H{
+		"result": SignAuth(jsonStruct.GetUser(user.Name)),
+	})
 }
 
-func GetDevices(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, `"Method not allowed"`, http.StatusMethodNotAllowed)
+func SetAPIKey(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(200, gin.H{
+			"error": "Not logged in",
+		})
 		return
 	}
-	Headers(w)
-	// guard clause
-	if r.Header.Get("Authorization") == "" || len(r.Header.Get("Authorization")) < 8 {
-		http.Error(w, "No authorization header", http.StatusUnauthorized)
-		return
-	}
-	// get token from header
-	token := r.Header.Get("Authorization")[7:]
-	// verify token and get user
-	user, err := auth.Validate(token)
-
-	if err != nil {
-		http.Error(w, "Invalid token", http.StatusUnauthorized)
-		return
-	}
-	// get devices
-	devices := jsonStruct.GetDevices(user.Name)
-
-	w.Write([]byte(devices))
-}
-
-func ReverseGeocode(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, `"Method not allowed"`, http.StatusMethodNotAllowed)
-		return
-	}
-	Headers(w)
-	// guard clause
-	if r.Header.Get("Authorization") == "" || len(r.Header.Get("Authorization")) < 8 {
-		http.Error(w, "No authorization header", http.StatusUnauthorized)
-		return
-	}
-	// get token from header
-	token := r.Header.Get("Authorization")[7:]
-	// verify token and get user
-	user, err := auth.Validate(token)
-
-	if err != nil {
-		http.Error(w, "Invalid token", http.StatusUnauthorized)
-		return
-	}
-	body, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		http.Error(w, `"Error reading request body"`, http.StatusInternalServerError)
-	}
-	// unmarshal body into data
 	var data map[string]string
-	err = json.Unmarshal(body, &data)
-	// get devices
-	lookup := jsonStruct.ReverseGeocode(user.Name, data["lat"], data["lon"])
+	err := c.BindJSON(&data)
 
-	w.Write([]byte(lookup))
+	if err != nil {
+		c.JSON(200, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	updateUser := jsonStruct.SetAPIKey(user.(store.CleanUser).Name, data["key"])
+	save()
+
+	c.JSON(200, gin.H{
+		"result": SignAuth(updateUser),
+	})
+}
+
+func GetDevices(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(200, gin.H{
+			"error": "Not logged in",
+		})
+		return
+	}
+
+	devices := jsonStruct.GetDevices(user.(store.CleanUser).Name)
+
+	data := make(map[string]interface{})
+	err := json.Unmarshal([]byte(devices), &data)
+
+	if err != nil {
+		c.JSON(200, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"result": data,
+	})
+}
+
+func ReverseGeocode(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(200, gin.H{
+			"error": "Not logged in",
+		})
+		return
+	}
+
+	var data map[string]string
+	err := c.BindJSON(&data)
+
+	if err != nil {
+		c.JSON(200, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	lookup := jsonStruct.ReverseGeocode(user.(store.CleanUser).Name, data["lat"], data["lon"])
+
+	data_ := make(map[string]interface{})
+	err = json.Unmarshal([]byte(lookup), &data_)
+
+	if err != nil {
+		c.JSON(200, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"result": data_,
+	})
 }
 
 // Need to be logged in to view or alter preferences
-func Preferences(w http.ResponseWriter, r *http.Request) {
-	Headers(w)
-	// guard clause
-	if r.Header.Get("Authorization") == "" {
-		http.Error(w, "No authorization header", http.StatusUnauthorized)
-		return
-	}
-	// get token from header
-	token := r.Header.Get("Authorization")[7:]
-	// verify token and get user
-	user, err := auth.Validate(token)
-
-	if err != nil {
-		http.Error(w, "Invalid token", http.StatusUnauthorized)
+func Preferences(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(200, gin.H{
+			"error": "Not logged in",
+		})
 		return
 	}
 
-	if r.Method == "GET" {
-		preferences := jsonStruct.GetPreferences(user.Name)
+	cleaned := user.(store.CleanUser)
 
-		marshalled, err := json.Marshal(preferences)
+	if c.Request.Method == "GET" {
+		preferences := jsonStruct.GetPreferences(cleaned.Name)
+
+		c.JSON(200, gin.H{
+			"result": preferences,
+		})
+	} else if c.Request.Method == "POST" {
+		var data map[string]interface{}
+		err := c.BindJSON(&data)
 
 		if err != nil {
-			fmt.Println(err)
-			w.Write([]byte(`"Error: ` + err.Error() + `"`))
+			c.JSON(200, gin.H{
+				"error": err.Error(),
+			})
 			return
 		}
 
-		w.Write(marshalled)
-	} else if r.Method == "POST" {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, `"Error reading request body"`, http.StatusInternalServerError)
-		}
-		// unmarshal body into preferences
-		var preferences map[string]interface{}
-		err = json.Unmarshal(body, &preferences)
-
-		if err != nil {
-			http.Error(w, "Error parsing JSON", http.StatusInternalServerError)
-		}
 		// update preferences
-		jsonStruct.SetPreferences(user.Name, preferences)
-
+		jsonStruct.SetPreferences(cleaned.Name, data)
 		save()
-		w.Write([]byte(`"Success"`))
-	} else {
-		w.Write([]byte(`"Error: Method not allowed"`))
+
+		c.JSON(200, gin.H{
+			"result": "Success",
+		})
 	}
 }
