@@ -72,7 +72,13 @@ async function getDevices() {
 
     return base(url).then(data => {
         if (!data) return Promise.reject('No data');
+        if (data.error === "No API key") {
+            setAPIKey('');
+            Auth.logout();
+            return Promise.reject('No data');
+        }
         const devices = []
+
         for (const device of data?.result_list ?? data ?? []) {
             const formatted = {
                 device_id: device.device_id,
@@ -101,7 +107,13 @@ async function setAPIKey(key) {
             key
         })
     }).then(data => {
-        if (data?.Token) {
+        if (data.error) {
+            return {
+                token: "temp",
+                error: data.error
+            }
+        }
+        else if (data?.Token) {
             Auth.login(data.Token);
         }
         return data;

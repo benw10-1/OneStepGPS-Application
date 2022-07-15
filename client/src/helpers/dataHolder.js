@@ -11,10 +11,12 @@ function Holder () {
             data = await Requests.getDevices();
         }
         catch (err) {
+            console.log(err);
             return
         }
         data = data?.result_list ?? data ?? [];
         // call all update functions with data
+        // console.log(data)
         for (const func of updateFuncs) {
             if (func) func(data);
         }

@@ -12,7 +12,7 @@
                 <div class="login-form-body" v-on:keydown="(e) => { if (e.key === 'Enter') login() }">
                     <div v-if="keySwitch" class="login-form-input">
                         <CustomInput placeholder="376529419055430ab4f3056b01e61fc6" label="API Key" :value="APIKey"
-                            :onChange="setAPIKey" :required="true" flexItem />
+                            :onChange="setAPIKey" :required="true" flexItem :error="Error" />
                     </div>
                     <div v-else class="login-form-input">
                         <CustomInput placeholder="JohnDoe77" label="Username" :value="Name" :onChange="setName"
@@ -20,12 +20,12 @@
                         <CustomInput placeholder="Password" label="Password" :value="Password" :onChange="setPass"
                             :required="true" type="password" flexItem :error="switch_ ? '' : Error" />
                     </div>
-                    <div class="login-form-submit" v-if="!keySwitch">
-                        <span v-on:click="other" class="login-form-switch">
+                    <div class="login-form-submit">
+                        <span v-on:click="other" class="login-form-switch" v-if="!keySwitch">
                             {{ switch_ ? "Already have an account?" : "Don't have an account?" }}
                         </span>
                         <CustomButton padding="10px 14px" width="100px"
-                            :value="keySwitch ? 'Submit' : (switch_ ? 'SIGNUP' : 'LOGIN')" :onClick="login" />
+                            :value="keySwitch ? 'SUBMIT' : (switch_ ? 'SIGNUP' : 'LOGIN')" :onClick="login" />
                     </div>
                 </div>
             </div>
@@ -80,11 +80,15 @@ export default {
                         await Requests.login(this.Name, this.Password))
                 // rerender with error if there is one
                 if (!data?.Token) {
-                    this.Error = this.switch_ ? "Username already taken" : "Invalid username or password"
+                    this.Error = this.keySwitch ? "API Key invalid" : this.switch_ ? "Username already taken" : "Invalid username or password"
                     return
                 }
                 // need to set API key
                 if (!data.APIKey) this.keySwitch = true
+                if (data.error) {
+                    this.Error = data.error
+                    return
+                }
             }
         },
         other() {

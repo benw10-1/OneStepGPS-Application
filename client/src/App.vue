@@ -22,7 +22,7 @@ export default {
   },
   data() {
     return {
-      loggedIn: Auth.loggedIn()
+      loggedIn: Auth.loggedIn() && Auth.getProfile()?.APIKey
     }
   },
   mounted() {

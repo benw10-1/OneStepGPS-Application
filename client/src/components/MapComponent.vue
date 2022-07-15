@@ -96,7 +96,7 @@ export default {
             settings: PreferenceHolder.get().mapSettings ?? {
                 showLabels: true,
                 cluster: true,
-                mapDisplay: 'street',
+                mapDisplay: 'STREET',
             },
             selected: null,
         }
@@ -149,7 +149,14 @@ export default {
             if (!data) return
             // create copy of array to always trigger rerender
             this.devices = data instanceof Array ? [...data] : { ...data }
-            this.display = this.devices
+            const prefs = PreferenceHolder.get()?.deviceSettings ?? {}
+            this.display = this.devices.filter((d) => {
+                if (prefs[d.device_id]) {
+                    return prefs[d.device_id].visible === undefined || prefs[d.device_id].visible
+                } else {
+                    return true
+                }
+            })
             // if map is loaded, update map
             if (this.map && this.loaded) {
                 if (this.first) {
@@ -163,9 +170,8 @@ export default {
                 if (this.display.length && this.featureLayer) {
                     this.featureLayer.clearLayers()
                     // remap all of our features to new devices
-                    const prefs = PreferenceHolder.get()?.deviceSettings ?? {}
+                    
                     this.geoJSON.addData(this.display.map((device, i) => {
-                        if (isNaN(device.lat) || isNaN(device.lng) || !prefs[device.device_id]?.visible) return
                         // console.log(device)
                         return {
                             type: 'Feature',

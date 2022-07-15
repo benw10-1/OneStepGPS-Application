@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"server/auth"
 	"server/store"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -109,7 +110,17 @@ func SetAPIKey(c *gin.Context) {
 	}
 
 	updateUser := jsonStruct.SetAPIKey(user.(store.CleanUser).Name, data["key"])
+	validKey := jsonStruct.GetDevices(user.(store.CleanUser).Name)
 	save()
+
+	if strings.Contains(validKey, "Invalid API") {
+		jsonStruct.SetAPIKey(user.(store.CleanUser).Name, "")
+		save()
+		c.JSON(200, gin.H{
+			"error": "Invalid API key",
+		})
+		return
+	}
 
 	c.JSON(200, gin.H{
 		"result": SignAuth(updateUser),
@@ -132,7 +143,7 @@ func GetDevices(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(200, gin.H{
-			"error": err.Error(),
+			"error": devices,
 		})
 		return
 	}

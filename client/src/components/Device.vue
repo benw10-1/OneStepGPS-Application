@@ -71,7 +71,7 @@ export default {
                 idle: "Idle",
             },
             // preference map
-            settings: PreferenceHolder.get()?.deviceSettings?.[this.device.device_id] || {
+            settings: PreferenceHolder.get()?.deviceSettings?.[this.device.device_id] ?? {
                 visible: true,
                 displayName: this.device.display_name,
             },

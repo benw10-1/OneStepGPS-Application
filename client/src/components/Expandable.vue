@@ -48,15 +48,13 @@ export default {
         onMouseEnter() {
             this.hovered = true;
         },
+        onClick(e) {
+            if (e.target === this.$refs.content) {
+                this.onChange(!this.expanded);
+            }
+        },
         onMouseLeave() {
             this.hovered = false;
-        },
-        onMouseDown() {
-            this.clicked = true;
-        },
-        onMouseUp() {
-            this.clicked = false;
-            this.onChange(!this.expanded)
         },
     },
 }
