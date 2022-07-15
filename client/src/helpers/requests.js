@@ -1,6 +1,6 @@
 import Auth from "./auth";
 // import Dummy from '../dummy/data.json';
-const HOST_URL = 'http://localho.st:3000/';
+// const HOST_URL = 'http://localho.st:3000/';
 // fetch wrapper
 async function base(url, override={}) {
     let token = Auth.getToken();
