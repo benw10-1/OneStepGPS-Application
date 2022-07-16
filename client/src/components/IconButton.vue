@@ -1,7 +1,7 @@
 <template>
     <div class="icon-container">
         <div class="icon-button" @mousedown="onMouseDown" @mouseup="onMouseUp" v-on:mouseenter="onMouseEnter"
-            v-on:mouseleave="onMouseLeave" @click="e => { e.preventDefault(); e.stopPropagation() }">
+            v-on:mouseleave="onMouseLeave" @click="onClick_">
             <span class="material-icons-outlined">
                 {{ icon }}
             </span>
@@ -52,6 +52,10 @@ export default {
         },
         onMouseDown() {
             this.clicked = true
+        },
+        onClick_(e) {
+            e.preventDefault();
+            e.stopPropagation();
         },
         onMouseUp() {
             this.clicked = false

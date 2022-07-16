@@ -104,7 +104,7 @@ export default {
     methods: {
         select(device) {
             this.selected = device
-            this.moveCenter([device.lat, device.lng])
+            if (device) this.moveCenter([device.lat, device.lng])
             this.updateDevices(this.devices)
         },
         deselect() {
@@ -311,6 +311,10 @@ export default {
                         // rotationAngle: feature.properties.heading,
                     })
 
+                    marker.on("click", () => {
+                        this.select(feature.properties)
+                    })
+
                     return marker
                 },
                 // on feature create
@@ -340,6 +344,9 @@ export default {
                     this.updateDevices(this.devices)
                 }, 50)
                 this.map = map
+            })
+            map.on("click", () => {
+                this.select(null)
             })
             const preventDouble = function (el) {
                 L.DomEvent.on(el, 'click', L.DomEvent.stopPropagation);
@@ -505,6 +512,7 @@ export default {
     display: grid;
     place-items: center;
     transition: background-color 0.2s ease-in-out;
+    user-select: none;
 }
 
 .view-controller-button:hover {

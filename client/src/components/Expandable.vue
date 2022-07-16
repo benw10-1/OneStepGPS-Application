@@ -1,6 +1,6 @@
 <template>
     <div class="expandable-container">
-        <div class="expandable-header" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave" @mousedown="onMouseDown" @mouseup="onMouseUp" >
+        <div class="expandable-header" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave" @click="onClick" >
             <slot name="header"></slot>
         </div>
         <div class="expandable-content-anchor">
@@ -32,6 +32,7 @@ export default {
         return {
             hovered: false,
             clicked: false,
+            snap_: true,
             colors: {
                 hovered: "rgba(155, 155, 155, 0.1)",
                 clicked: "rgba(155, 155, 155, 0.2)",
@@ -40,21 +41,22 @@ export default {
         }
     },
     mounted() {
-        const margin = parseInt(window.getComputedStyle(this.$refs.content).marginTop) + parseInt(window.getComputedStyle(this.$refs.content).marginBottom);
-        this.maxHeight = this.$refs.content.offsetHeight + margin + "px";
-        console.log(this.maxHeight);
+        setTimeout(this.updateHeight, 300)
     },
     methods: {
         onMouseEnter() {
             this.hovered = true;
         },
-        onClick(e) {
-            if (e.target === this.$refs.content) {
-                this.onChange(!this.expanded);
-            }
+        onClick() {
+            this.onChange(!this.expanded)
         },
         onMouseLeave() {
             this.hovered = false;
+        },
+        updateHeight() {
+            const margin = parseInt(window.getComputedStyle(this.$refs.content).marginTop) + parseInt(window.getComputedStyle(this.$refs.content).marginBottom);
+            this.maxHeight = this.$refs.content.offsetHeight + margin;
+            this.snap_ = this.snap;
         },
     },
 }
@@ -64,6 +66,7 @@ export default {
 .expandable-container {
     width: 100%;
     box-sizing: border-box;
+    border-bottom: 1px solid #e0e0e0;
 }
 .expandable-header {
     width: 100%;
@@ -74,14 +77,15 @@ export default {
     -moz-user-select: none;
     -ms-user-select: none;
     background-color: v-bind("hovered ? colors.hovered : 'transparent'");
+    transition: v-bind("clicked ? 'none' : 'all .2s ease-in'");
 }
 .expandable-content-anchor {
     width: 100%;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
-    transition: v-bind("snap ? '' : 'max-height 0.3s ease-in'");
-    max-height: v-bind("expanded ? maxHeight : 0");
+    transition: v-bind("snap_ ? '' : 'height 0.3s ease-in'");
+    height: v-bind("(expanded ? maxHeight : 0) + 'px'");
 }
 .expandable-content {
     width: 100%;

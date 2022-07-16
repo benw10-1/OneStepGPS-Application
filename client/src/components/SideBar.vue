@@ -9,6 +9,7 @@
           </span>
         </CustomInput>
       </div>
+      <FilterBar />
     </div>
     <div class="devices-container">
       <DeviceComponent v-for="device of display" :device="device" v-bind:key="device.device_id" @edit="editDevice"
@@ -33,18 +34,22 @@
 import { Holder, PreferenceHolder } from '../helpers'
 import CustomInput from './CustomInput.vue'
 import DeviceComponent from './Device.vue'
+import FilterBar from './FilterBar.vue'
 
 export default {
   name: 'SideBar',
   components: {
     CustomInput,
     DeviceComponent,
+    FilterBar
   },
   mounted() {
     Holder.onUpdate(this.updateDevices)
+    PreferenceHolder.onUpdate(this.refreshDevices)
   },
   unmounted() {
     Holder.removeUpdate(this.updateDevices)
+    PreferenceHolder.removeUpdate(this.refreshDevices)
   },
   props: {
     setMapCenter: {
@@ -105,6 +110,9 @@ export default {
     locateDevice(device) {
       if (this.select) this.select(device)
     },
+    refreshDevices() {
+      this.updateDevices(this.devices)
+    },
     updateDevices(data) {
       if (!data) return
       // create copy of array to always trigger rerender
@@ -121,8 +129,9 @@ export default {
     },
     // simple JS sort function to sort devices by display name
     filtered() {
+      const prefs = PreferenceHolder.get()?.filter
       return this.devices.filter(device => {
-        return device.display_name.toLowerCase().includes(this.search.toLowerCase().trim())
+        return device.display_name.toLowerCase().includes(this.search.toLowerCase().trim()) && (!prefs || prefs.disabled || prefs.tags.includes(device.online ? device.drive_status : 'offline'))
       })
     },
   }
