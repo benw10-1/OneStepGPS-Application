@@ -2,6 +2,7 @@
     <div class="expandable-container">
         <div class="expandable-header" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave" @click="onClick" >
             <slot name="header"></slot>
+            <div v-if="expanded" class="bottom-shadow"></div>
         </div>
         <div class="expandable-content-anchor">
             <div class="expandable-content" ref="content">
@@ -42,6 +43,7 @@ export default {
     },
     mounted() {
         setTimeout(this.updateHeight, 300)
+        this.$refs.content.addEventListener("resize", this.updateHeight)
     },
     methods: {
         onMouseEnter() {
@@ -69,6 +71,7 @@ export default {
     border-bottom: 1px solid #e0e0e0;
 }
 .expandable-header {
+    position: relative;
     width: 100%;
     box-sizing: border-box;
     cursor: pointer;
@@ -77,14 +80,16 @@ export default {
     -moz-user-select: none;
     -ms-user-select: none;
     background-color: v-bind("hovered ? colors.hovered : 'transparent'");
-    transition: v-bind("clicked ? 'none' : 'all .2s ease-in'");
+    transition: v-bind("clicked ? 'none' : 'all .2s ease-in-out'");
+    z-index: 1;
+    box-shadow: v-bind("expanded ? '0 5px 2px -2px rgba(0, 0, 0, .44)' : 'none'");
 }
 .expandable-content-anchor {
     width: 100%;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
-    transition: v-bind("snap_ ? '' : 'height 0.3s ease-in'");
+    transition: v-bind("snap_ ? '' : 'height 0.3s ease-in-out'");
     height: v-bind("(expanded ? maxHeight : 0) + 'px'");
 }
 .expandable-content {
@@ -92,5 +97,14 @@ export default {
     box-sizing: border-box;
     position: absolute;
     bottom: 0;
+}
+.expandable-header::after {
+    position: absolute;
+    width: 100%;
+    bottom: 1px;
+    z-index: 0;
+    left: 0;
+    background-color: #e0e0e0;
+    box-shadow: 0px 0px 8px 2px #000000;
 }
 </style>

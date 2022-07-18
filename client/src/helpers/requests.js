@@ -64,6 +64,21 @@ async function signup(Name, Password) {
     })
 }
 
+function convertUnitObj(obj, to='mi') {
+    if (!obj) return obj;
+    const { value, unit } = obj;
+
+    if (unit === 'km/h' || unit === 'km') {
+        return Math.round(value/1.60934);
+    }
+    if (unit === "m") {
+        if (to === 'ft' ) return Math.round(value * 3.28084);
+        return Math.round(value / 1609.34);
+    }
+
+    return value;
+}
+
 async function getDevices() {
     const key = Auth.getProfile()?.APIKey;
     if (!key) return Promise.reject('No API key');
@@ -89,7 +104,10 @@ async function getDevices() {
                 lng: device.latest_device_point?.lng ?? device.lng,
                 drive_status: device.latest_device_point?.device_state?.drive_status ?? device.drive_status,
                 drive_status_begin_time: device.latest_device_point?.device_state?.drive_status_begin_time ?? device.drive_status_begin_time,
-                speed: Math.round(device.latest_device_point?.device_point_detail?.speed?.value * (device.latest_device_point?.device_point_detail?.speed?.unit === 'km/h' ? 0.621371192 : 1) ?? device.speed * 0.621371192),
+                odometer: convertUnitObj(device.latest_device_point?.device_state?.odometer ?? device.odometer),
+                speed: convertUnitObj(device.latest_device_point?.device_point_detail?.speed ?? device.speed),
+                altitude: convertUnitObj(device.latest_device_point?.device_point_detail?.altitude ?? device.altitude, "ft"),
+                voltage: device.latest_device_point?.device_point_detail?.external_volt ?? device.external_volt,
             }
             devices.push(formatted);
         }
@@ -145,8 +163,8 @@ async function reverseGeocode(lat, lng) {
     return base(url, {
         method: 'POST',
         body: JSON.stringify({
-            lat,
-            lon: lng
+            lat: String(lat),
+            lon: String(lng)
         })
     }).then(data => {
         if (!data) return Promise.reject('No data');

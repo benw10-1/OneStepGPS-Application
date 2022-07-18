@@ -3,7 +3,7 @@
         <template v-slot:header>
             <div class="filter-header">
                 <div class="filter-header-left">
-                    <span class="material-icons-outlined">{{ expanded ? 'expand_less' : 'expand_more' }}</span>
+                    <span class="expanded-icon material-icons-outlined">expand_more</span>
                     <span class="header-text">Filter Devices</span>
                 </div>
                 <IconButton :icon="disabled ? 'filter_list_off' : 'filter_list'" :size="24" :onClick="toggleDisabled" />
@@ -105,7 +105,7 @@ export default {
     width: 100%;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem .66rem;
+    padding: 0.5rem;
     box-sizing: border-box;
 }
 .filter-header-left {
@@ -121,7 +121,7 @@ export default {
 }
 
 .filter-content {
-    padding: 0.5rem;
+    padding: .5rem .75rem;
     width: 100%;
     height: fit-content;
     box-sizing: border-box;
@@ -132,5 +132,11 @@ export default {
     height: fit-content;
     box-sizing: border-box;
     flex-wrap: wrap;
+}
+.filter-group-header-text {
+    text-decoration: underline;
+}
+.expanded-icon {
+    transform: v-bind("expanded ? '' : 'rotate(-90deg)'");
 }
 </style>

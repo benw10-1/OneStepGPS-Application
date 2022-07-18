@@ -129,6 +129,7 @@ export default {
             Auth.logout()
         },
         changeCluster(cluster, map = this.map) {
+            console.log('cluster', cluster)
             if (this.featureLayer) map.removeLayer(this.featureLayer)
 
             this.featureLayer = L.markerClusterGroup({
@@ -209,9 +210,10 @@ export default {
             }
             else {
                 safe = true
+                if (settings.cluster !== undefined) this.changeCluster(settings.cluster)
+                if (settings.mapDisplay) this.changeMapType(settings.mapDisplay?.toLowerCase() ?? "street")
             }
-            if (this.settings !== settings.cluster && settings.cluster !== undefined) this.changeCluster(settings.cluster)
-            if (settings.mapDisplay) this.changeMapType(settings.mapDisplay?.toLowerCase() ?? "street")
+            
             this.settings = {
                 ...this.settings,
                 ...settings,
@@ -433,7 +435,7 @@ export default {
             map.setView(this.center, 13)
         },
         moveCenter(lat, lng) {
-            this.map.setView(L.latLng(lat, lng), 12)
+            this.map.panTo(L.latLng(lat, lng), 12)
             this.center = [lat, lng]
         },
         // return bounding box of all viewable devices

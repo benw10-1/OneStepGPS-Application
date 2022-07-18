@@ -44,9 +44,9 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem;
+    padding: 0.25rem .3rem;
     border-radius: 0.25rem;
-    background-color: rgba(111, 111, 111, .40);
+    background-color: rgba(160, 160, 160, .40);
     cursor: pointer;
     box-sizing: border-box;
     margin: 8px 8px 8px 0;

@@ -88,7 +88,7 @@ export default {
     font-size: 17px;
     font-weight: bold;
     color: v-bind("hovered ? colors.selected : colors.unselected");
-    transition: all .2s ease-in;
+    transition: all .2s ease-in-out;
 }
 .options-container {
     position: relative;
@@ -97,7 +97,7 @@ export default {
     overflow: hidden;
     background-color: v-bind("(hovered && !clicked) ? 'rgba(155, 155, 155, .47)' : 'transparent'");
     border-radius: 5px;
-    transition: v-bind("clicked ? 'none' : 'all .2s ease-in'");
+    transition: v-bind("clicked ? 'none' : 'all .2s ease-in-out'");
     cursor: pointer;
     user-select: none;
     outline: none;

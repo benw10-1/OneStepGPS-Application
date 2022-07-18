@@ -76,4 +76,12 @@ body {
 .v-leave-to {
   opacity: 0;
 }
+
+p {
+  font-size: 1.08rem;
+  font-weight: 300;
+  /* line-height: 1.5; */
+  margin: 0;
+  padding: 0;
+}
 </style>

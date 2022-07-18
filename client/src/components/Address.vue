@@ -2,19 +2,20 @@
     <div class="address-container">
         <div v-if="loading" class="loader"></div>
         <div v-else class="address-text">
-            {{ address }}
+            <p>{{ address }}</p>
+            <p>{{ latlng[0].toFixed(6) }}, {{ latlng[1].toFixed(6) }}</p>
         </div>
     </div>
 </template>
 
 <script>
-import { Requests } from '@/helpers'
+import { locationCache } from '@/helpers'
 
 export default {
     name: "AddressComponent",
     props: {
         latlng: {
-            type: Object,
+            type: Array,
             required: true,
         },
     },
@@ -35,8 +36,8 @@ export default {
     methods: {
         getAddress(latlng=this.latlng) {
             this.loading = true
-            Requests.reverseGeocode(latlng.lat, latlng.lng).then(response => {
-                this.address = response.address
+            locationCache.requestLocation(latlng).then(address => {
+                this.address = address
                 this.loading = false
             })
         },
