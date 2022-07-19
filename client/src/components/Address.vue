@@ -39,6 +39,7 @@ export default {
             locationCache.requestLocation(latlng).then(address => {
                 this.address = address
                 this.loading = false
+                this.$emit('loaded')
             })
         },
     },

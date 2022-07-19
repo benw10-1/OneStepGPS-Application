@@ -1,5 +1,5 @@
 <template>
-    <ExpandableVue :onChange="onChangeExpand" :expanded="expanded" :snap="disabled">
+    <ExpandableVue :onChange="onChangeExpand" :expanded="expanded">
         <template v-slot:header>
             <div class="filter-header">
                 <div class="filter-header-left">
@@ -45,7 +45,7 @@ export default {
     },
     data() {
         return {
-            checked: preferenceHolder.get()?.filter?.tags ?? this.tags,
+            checked: this.tags,
             expanded: false,
             disabled: preferenceHolder.get()?.filter?.disabled,
             driveStates: {
@@ -56,11 +56,18 @@ export default {
             },
         }
     },
+    mounted() {
+        preferenceHolder.onUpdate(this.prefUpdate)
+    },
+    unmounted() {
+        preferenceHolder.removeUpdate(this.prefUpdate)
+    },
     methods: {
+        prefUpdate(prefs) {
+            this.checked = prefs.filter?.tags ?? this.tags
+            this.disabled = prefs.filter?.disabled ?? false
+        },
         onChange(tag) {
-            if (this.disabled) {
-                return
-            }
             if (this.checked.includes(tag)) {
                 this.checked = this.checked.filter(t => t !== tag)
             } else {
@@ -71,7 +78,7 @@ export default {
                     tags: this.checked,
                     disabled: this.disabled,
                 }
-            })
+            }, this.prefUpdate)
         },
         onChangeExpand(expanded) {
             this.expanded = expanded
@@ -89,13 +96,13 @@ export default {
             })
         },
     },
-    watch: {
-        disabled(newValue) {
-            if (newValue) {
-                this.collapse()
-            }
-        },
-    },
+    // watch: {
+    //     disabled(newValue) {
+    //         if (newValue) {
+    //             this.collapse()
+    //         }
+    //     },
+    // },
 }
 </script>
 
@@ -133,9 +140,9 @@ export default {
     box-sizing: border-box;
     flex-wrap: wrap;
 }
-.filter-group-header-text {
+/* .filter-group-header-text {
     text-decoration: underline;
-}
+} */
 .expanded-icon {
     transform: v-bind("expanded ? '' : 'rotate(-90deg)'");
 }

@@ -10,6 +10,7 @@
         </CustomInput>
       </div>
       <FilterBar />
+      <SortBar />
     </div>
     <div class="devices-container">
       <DeviceComponent v-for="device of display" :device="device" v-bind:key="device.device_id" @edit="editDevice"
@@ -35,13 +36,15 @@ import { Holder, PreferenceHolder } from '../helpers'
 import CustomInput from './CustomInput.vue'
 import DeviceComponent from './Device.vue'
 import FilterBar from './FilterBar.vue'
+import SortBar from './SortBar.vue'
 
 export default {
   name: 'SideBar',
   components: {
     CustomInput,
     DeviceComponent,
-    FilterBar
+    FilterBar,
+    SortBar
   },
   mounted() {
     Holder.onUpdate(this.updateDevices)
@@ -130,9 +133,31 @@ export default {
     // simple JS sort function to sort devices by display name
     filtered() {
       const prefs = PreferenceHolder.get()?.filter
-      return this.devices.filter(device => {
+      const sort = PreferenceHolder.get()?.sort === "none" ? null : PreferenceHolder.get()?.sort
+
+      const filtered = this.devices.filter(device => {
         return device.display_name.toLowerCase().includes(this.search.toLowerCase().trim()) && (!prefs || prefs.disabled || prefs.tags.includes(device.online ? device.drive_status : 'offline'))
       })
+
+      if (sort) {
+        const devSettings = PreferenceHolder.get().deviceSettings ?? {}
+        if (sort === "asc") {
+          filtered.sort((a, b) => {
+            const namea = devSettings[a.device_id]?.displayName ?? a.display_name.toLowerCase()
+            const nameb = devSettings[b.device_id]?.displayName ?? b.display_name.toLowerCase()
+            return namea.localeCompare(nameb)
+          })
+        }
+        else {
+          filtered.sort((a, b) => {
+            const namea = devSettings[a.device_id]?.displayName ?? a.display_name.toLowerCase()
+            const nameb = devSettings[b.device_id]?.displayName ?? b.display_name.toLowerCase()
+            return nameb.localeCompare(namea)
+          })
+        }
+      }
+
+      return filtered
     },
   }
 }
@@ -200,6 +225,7 @@ export default {
 .close:hover {
   color: rgb(25, 118, 210);
 }
+
 .modal-header {
   font-size: 20px;
   font-weight: bold;

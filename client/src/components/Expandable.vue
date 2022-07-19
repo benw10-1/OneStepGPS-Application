@@ -56,9 +56,18 @@ export default {
             this.hovered = false;
         },
         updateHeight() {
+            if (!this.$refs.content) return
             const margin = parseInt(window.getComputedStyle(this.$refs.content).marginTop) + parseInt(window.getComputedStyle(this.$refs.content).marginBottom);
             this.maxHeight = this.$refs.content.offsetHeight + margin;
             this.snap_ = this.snap;
+        },
+    },
+    watch: {
+        expanded: {
+            immediate: true,
+            handler() {
+                this.updateHeight()
+            },
         },
     },
 }
@@ -82,7 +91,7 @@ export default {
     background-color: v-bind("hovered ? colors.hovered : 'transparent'");
     transition: v-bind("clicked ? 'none' : 'all .2s ease-in-out'");
     z-index: 1;
-    box-shadow: v-bind("expanded ? '0 5px 2px -2px rgba(0, 0, 0, .44)' : 'none'");
+    box-shadow: v-bind("expanded ? '0px 15px 10px -15px #111' : 'none'");
 }
 .expandable-content-anchor {
     width: 100%;
