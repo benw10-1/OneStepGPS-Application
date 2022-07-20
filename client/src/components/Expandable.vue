@@ -57,6 +57,7 @@ export default {
         },
         updateHeight() {
             if (!this.$refs.content) return
+            // compute expanded into height
             const margin = parseInt(window.getComputedStyle(this.$refs.content).marginTop) + parseInt(window.getComputedStyle(this.$refs.content).marginBottom);
             this.maxHeight = this.$refs.content.offsetHeight + margin;
             this.snap_ = this.snap;
@@ -66,6 +67,7 @@ export default {
         expanded: {
             immediate: true,
             handler() {
+                // update height on each expand in case content height changed
                 this.updateHeight()
             },
         },

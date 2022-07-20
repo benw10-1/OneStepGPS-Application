@@ -38,6 +38,7 @@ export default {
         }
     },
     methods: {
+        // loading triggers + handlers
         setSideLoad(loaded) {
             this.sideLoaded = loaded
             if (this.sideLoaded && this.mapLoaded) {

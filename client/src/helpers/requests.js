@@ -93,7 +93,7 @@ async function getDevices() {
             return Promise.reject('No data');
         }
         const devices = []
-
+        // device schema
         for (const device of data?.result_list ?? data ?? []) {
             const formatted = {
                 device_id: device.device_id,

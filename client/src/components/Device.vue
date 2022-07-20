@@ -2,16 +2,17 @@
     <ExpandableVue :onChange="onExpand" :expanded="expanded">
         <template v-slot:header>
             <div class="device-container">
-                <div :class="'device-sidebar ' + (device.online ? device.drive_status : 'offline')"></div>
+                <div style="margin-right: 10px">
+                    <SVGIcon :icon="settings.icon ?? 'car'" />
+                </div>
                 <div class="device-inner">
                     <div class="device-main-info">
                         <div class="device-display-name">
                             {{ settings.displayName }}
                         </div>
                         <div class="device-status">
-                            {{ (device.online ? driveStates[device.drive_status] : "No signal") + ' ' +
-                                    formatTime(device.drive_status_begin_time)
-                            }}
+                            <div :class="'status-text ' + (device.online ? device.drive_status : 'offline')">{{ device.online ? driveStates[device.drive_status] : "No signal" }}</div>
+                            <span>{{ time }}</span>
                         </div>
                     </div>
                     <div class="device-right">
@@ -36,54 +37,25 @@
             </div>
         </template>
         <template v-slot:default>
-            <div class="device-content">
-                <div class="device-info">
-                    <div class="device-info-header">
-                        <span class="device-info-header-text">Location</span>
-                    </div>
-                    <div class="device-info-content">
-                        <div class="device-info-content-text">
-                            <AddressVue :latlng="[device.lat, device.lng]" />
-                        </div>
-                    </div>
-                </div>
-                <div class="device-info" style="margin: 14px 0 0">
-                    <div class="device-info-content">
-                        <div class="device-info-row">
-                            <div class="info-block">
-                                <div class="device-info-header-text">Altitude</div>
-                                <span>{{ device.altitude + " ft" }}</span>
-                            </div>
-                            <div class="info-block" v-if="device.odometer">
-                                <div class="device-info-header-text">Odometer</div>
-                                <span>{{ device.odometer + " mi" }}</span>
-                            </div>
-                            <div class="info-block">
-                                <div class="device-info-content-text">Voltage</div>
-                                <span>{{ device.voltage + " V" }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <DeviceInfo :device="device" />
         </template>
     </ExpandableVue>
 </template>
 
 <script>
-// import { CustomInput } from './CustomInput.vue'
 import IconButton from './IconButton.vue'
 import { dateFormatter, PreferenceHolder } from '../helpers'
 import ExpandableVue from './Expandable.vue'
-import AddressVue from './Address.vue'
+import DeviceInfo from './DeviceInfo.vue'
+import SVGIcon from './SVGIcon.vue'
 
 export default {
     name: "DeviceComponent",
     components: {
         IconButton,
         ExpandableVue,
-        AddressVue,
-        // CustomInput,
+        DeviceInfo,
+        SVGIcon,
     },
     props: {
         device: {
@@ -105,6 +77,7 @@ export default {
                 idle: "rgba(135, 206, 250, .67)",
                 offline: "rgba(218, 223, 225, .8)",
             },
+            time: this.formatTime(this.device.drive_status_begin_time),
             driveStates: {
                 off: "Stopped",
                 driving: "Driving",
@@ -114,6 +87,7 @@ export default {
             settings: PreferenceHolder.get()?.deviceSettings?.[this.device.device_id] ?? {
                 visible: true,
                 displayName: this.device.display_name,
+                icon: "car",
             },
             expanded: false
         }
@@ -137,6 +111,7 @@ export default {
                 ...this.settings,
                 ...settings,
             }
+
             // prevent infinite loop
             if (safe) PreferenceHolder.set({
                 deviceSettings: {
@@ -145,7 +120,16 @@ export default {
                 },
             }, this.updateSettings)
         },
-    }
+    },
+    watch: {
+        device: {
+            handler(newDevice) {
+                // update time on device update, not on state change
+                this.time = this.formatTime(newDevice.drive_status_begin_time)
+            },
+            immediate: true,
+        },
+    },
 }
 </script>
 
@@ -158,7 +142,7 @@ export default {
     align-items: center;
     flex-direction: row;
     box-sizing: border-box;
-    padding: 0 14px;
+    padding: 0 7px;
     background-color: v-bind("settings.visible ? 'transparent' : 'rgba(155, 155, 155, .1)'");
     transition: all .2s ease-in;
 }
@@ -174,18 +158,22 @@ export default {
 
 .off {
     background: v-bind("colors.off");
+    color: white;
 }
 
 .driving {
     background: v-bind("colors.driving");
+    color: black;
 }
 
 .idle {
     background: v-bind("colors.idle");
+    color: black;
 }
 
 .offline {
     background: v-bind("colors.offline");
+    color: black;
 }
 
 .device-inner {
@@ -272,5 +260,19 @@ export default {
     flex-direction: row;
     align-items: center;
     width: 100%;
+}
+.device-status {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.status-text {
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    padding: 4px;
+    font-weight: 600;
+    margin-right: 5px;
+    border-radius: 4px;
 }
 </style>

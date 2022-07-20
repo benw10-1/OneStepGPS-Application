@@ -108,12 +108,13 @@ func SetAPIKey(c *gin.Context) {
 		})
 		return
 	}
-
+	// update preferences
 	updateUser := jsonStruct.SetAPIKey(user.(store.CleanUser).Name, data["key"])
 	validKey := jsonStruct.GetDevices(user.(store.CleanUser).Name)
 	save()
 
 	if strings.Contains(validKey, "Invalid API") {
+		// invalid key
 		jsonStruct.SetAPIKey(user.(store.CleanUser).Name, "")
 		save()
 		c.JSON(200, gin.H{
@@ -135,7 +136,7 @@ func GetDevices(c *gin.Context) {
 		})
 		return
 	}
-
+	// get devices
 	devices := jsonStruct.GetDevices(user.(store.CleanUser).Name)
 
 	data := make(map[string]interface{})

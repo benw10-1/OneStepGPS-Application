@@ -36,6 +36,7 @@ export default {
     methods: {
         getAddress(latlng=this.latlng) {
             this.loading = true
+            // returns cached location if available, otherwise request reverse geocode
             locationCache.requestLocation(latlng).then(address => {
                 this.address = address
                 this.loading = false

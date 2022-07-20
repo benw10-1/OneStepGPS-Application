@@ -40,7 +40,8 @@ export default {
     },
     logout() {
         localStorage.removeItem('id_token')
-        this.logoutFuncs.forEach(func => func())
+        window.location.reload()
+        // this.logoutFuncs.forEach(func => func())
     },
     onLogin(callback) {
         this.loginFuncs.push(callback)

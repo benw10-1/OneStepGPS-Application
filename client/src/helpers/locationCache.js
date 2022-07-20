@@ -6,12 +6,12 @@ function locationCache() {
     async function requestLocation(latLonArr) {
         return new Promise((resolve) => {
             const [lat, lon] = latLonArr;
-
+            // cached location
             if (cache[lat] && cache[lat][lon]) {
                 resolve(cache[lat][lon]);
                 return;
             }
-
+            // not cached
             Requests.reverseGeocode(lat, lon).then(data => {
                 if (!data) return;
                 if (!cache[lat]) cache[lat] = {};

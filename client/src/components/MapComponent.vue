@@ -99,6 +99,7 @@ export default {
                 mapDisplay: 'STREET',
             },
             selected: null,
+            selectTrigger: false,
         }
     },
     methods: {
@@ -106,6 +107,7 @@ export default {
             this.selected = device
             if (device) this.moveCenter([device.lat, device.lng])
             this.updateDevices(this.devices)
+            this.selectTrigger = !this.selectTrigger
         },
         deselect() {
             this.selected = null
@@ -129,7 +131,6 @@ export default {
             Auth.logout()
         },
         changeCluster(cluster, map = this.map) {
-            console.log('cluster', cluster)
             if (this.featureLayer) map.removeLayer(this.featureLayer)
 
             this.featureLayer = L.markerClusterGroup({
@@ -174,7 +175,7 @@ export default {
                 if (this.display.length && this.featureLayer) {
                     this.featureLayer.clearLayers()
                     // remap all of our features to new devices
-                    
+                    this.selectTrigger = !this.selectTrigger
                     this.geoJSON.addData(this.display.map((device, i) => {
                         // console.log(device)
                         return {
@@ -197,6 +198,7 @@ export default {
                                 color: device.online ? this.colors[device.drive_status] : this.colors['offline'],
                                 speed: device.speed,
                                 selected: this.selected?.device_id === device.device_id,
+                                trigger: this.selectTrigger,
                             }
                         }
                     }).filter(x => x))
@@ -210,10 +212,12 @@ export default {
             }
             else {
                 safe = true
-                if (settings.cluster !== undefined) this.changeCluster(settings.cluster)
-                if (settings.mapDisplay) this.changeMapType(settings.mapDisplay?.toLowerCase() ?? "street")
             }
-            
+            if (settings.cluster !== undefined) this.changeCluster(settings.cluster)
+            if (settings.mapDisplay) {
+                console.log("preffed")
+                this.changeMapType(settings.mapDisplay?.toLowerCase())
+            }
             this.settings = {
                 ...this.settings,
                 ...settings,
@@ -222,13 +226,12 @@ export default {
             this.updateDevices(this.devices)
         },
         changeMapType(type, map = this.map) {
+            type = type?.toLowerCase()
+            console.log(type)
             if (!this.tileLayer) {
                 this.tileLayer = L.tileLayer(null, {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map)
-            }
-            if (type === this.settings?.mapType ?? "street") {
-                return
             }
             if (type === "satelite") {
                 this.tileLayer.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}")
@@ -268,12 +271,15 @@ export default {
                         return short
                     })()
                         }, -50%);`
+
                     const svgIcon = L.divIcon({
                         className: 'device-icon',
                         // the physical HTML element being disaplyed at point [lat, lon]
-                        html: `<div class="device-icon-inner" id=${feature.properties.device_id} >
+                        html: `<div class="device-icon-inner" id=${'id' + feature.properties.device_id.replace(/[^\w\d]/gi, "")}>
                             <div style="${svgSt}">
-                                ${feature.properties.selected ? `<div class="device-icon-selected"></div>` : ``}
+                                ${feature.properties.selected ? `
+                                <div class="device-icon-selected"></div>
+                                ` : ``}
                                 <svg
                                     width="24"
                                     height="35"
@@ -560,6 +566,10 @@ export default {
     white-space: nowrap;
 }
 
+.popup-content {
+    padding: .5rem;
+}
+
 .tail-shadow {
     background-color: transparent;
     width: 4px;
@@ -567,6 +577,20 @@ export default {
     position: absolute;
     top: 16px;
     left: -8px;
+    z-index: -10;
+    box-shadow: 0px 0px 8px 1px black;
+    -moz-box-shadow: 0px 0px 8px 1px black;
+    -webkit-box-shadow: 0px 0px 8px 1px black;
+}
+
+.tail-shadow-popup {
+    background-color: transparent;
+    width: 4px;
+    height: 4px;
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: -10;
     box-shadow: 0px 0px 8px 1px black;
     -moz-box-shadow: 0px 0px 8px 1px black;
@@ -584,6 +608,17 @@ export default {
     left: -20px;
 }
 
+.tail-layer-popup {
+    width: 0px;
+    height: 0px;
+    border: 10px solid;
+    border-color: transparent transparent transparent #e0e0e0;
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 .tail-background {
     width: 0px;
     height: 0px;
@@ -593,6 +628,17 @@ export default {
     left: -18px;
     top: 50%;
     transform: translateY(-50%);
+}
+
+.tail-background-popup {
+    width: 0px;
+    height: 0px;
+    border: 10px solid;
+    border-color: transparent #ffffff transparent transparent;
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .leaflet-marker-icon {
@@ -649,5 +695,14 @@ export default {
     border-radius: 100%;
     width: 45px;
     height: 45px;
+}
+
+.icon-selected {
+    position: relative;
+}
+
+.icon-popup {
+    position: absolute;
+    top: 50%;
 }
 </style>

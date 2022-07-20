@@ -14,7 +14,7 @@
     </div>
     <div class="devices-container">
       <DeviceComponent v-for="device of display" :device="device" v-bind:key="device.device_id" @edit="editDevice"
-        @locate="locateDevice" />
+        @locate="locateDevice" @drag="() => {console.log('dragged')}" />
     </div>
   </div>
   <Teleport to="body">
@@ -25,6 +25,14 @@
           <div class="modal-header">Edit Device</div>
           <CustomInput :value="displayName" :label="'Display Name'" :onChange="setDeviceName" :required="true"
             :width="'100%'" :height="'40px'" @blur="updateDisplayname" />
+          <div class="icon-selector">
+            <div class="icon-selector-header">Icon</div>
+            <div class="icon-selector-body">
+              <div class="icon-selector-icon" v-for="key in Object.keys(svgMap)" :key="key" @click="() => {updateIcon(key)}" :class="{selected: icon === key}">
+                <SVGIcon :icon="key" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Transition>
@@ -33,10 +41,12 @@
 
 <script>
 import { Holder, PreferenceHolder } from '../helpers'
+import SVGIcon from './SVGIcon.vue'
 import CustomInput from './CustomInput.vue'
 import DeviceComponent from './Device.vue'
 import FilterBar from './FilterBar.vue'
 import SortBar from './SortBar.vue'
+import fileMap from '../assets/imageMap.json'
 
 export default {
   name: 'SideBar',
@@ -44,7 +54,8 @@ export default {
     CustomInput,
     DeviceComponent,
     FilterBar,
-    SortBar
+    SortBar,
+    SVGIcon,
   },
   mounted() {
     Holder.onUpdate(this.updateDevices)
@@ -55,10 +66,12 @@ export default {
     PreferenceHolder.removeUpdate(this.refreshDevices)
   },
   props: {
+    // map controller
     setMapCenter: {
       type: Function,
       default: null
     },
+    // selected device controller
     select: {
       type: Function,
       default: null
@@ -73,13 +86,19 @@ export default {
       display: [],
       firstLoad: true,
       editingDevice: false,
+      // modal state
       displayName: '',
+      icon: 'car',
+      svgMap: fileMap,
     }
   },
   methods: {
     editDevice(device) {
       this.editingDevice = device
-      this.displayName = PreferenceHolder.get().deviceSettings?.[device.device_id]?.displayName || device.display_name
+      // get cached display name and icon
+      const pref = PreferenceHolder.get().deviceSettings?.[device.device_id] ?? {}
+      this.displayName = pref.displayName || device.display_name
+      this.icon = pref.icon || 'car'
       window.addEventListener("click", this.stopEditing)
     },
     setDeviceName(name) {
@@ -88,6 +107,7 @@ export default {
     updateDisplayname() {
       if (!this.editingDevice || !this.displayName) return false
       const prev = PreferenceHolder.get().deviceSettings ?? {}
+      // overwrite display name
       PreferenceHolder.set({
         deviceSettings: {
           ...prev,
@@ -98,7 +118,23 @@ export default {
         }
       })
     },
+    updateIcon(icon) {
+      if (!this.editingDevice || !this.icon) return false
+      const prev = PreferenceHolder.get().deviceSettings ?? {}
+      this.icon = icon
+      // overwrite icon
+      PreferenceHolder.set({
+        deviceSettings: {
+          ...prev,
+          [this.editingDevice.device_id]: {
+            ...prev?.[this.editingDevice.device_id] ?? {},
+            icon: this.icon
+          }
+        }
+      })
+    },
     stopEditing(e) {
+      // ignores close button
       if (!e.target.classList?.contains("close")) {
         for (const x of e.composedPath()) {
           if (x.classList?.contains("modal-content")) {
@@ -106,6 +142,7 @@ export default {
           }
         }
       }
+      // update state on modal close
       this.updateDisplayname()
       this.editingDevice = false
       window.removeEventListener("click", this.stopEditing)
@@ -132,15 +169,17 @@ export default {
     },
     // simple JS sort function to sort devices by display name
     filtered() {
+      // prefrences get
       const prefs = PreferenceHolder.get()?.filter
       const sort = PreferenceHolder.get()?.sort === "none" ? null : PreferenceHolder.get()?.sort
-
+      // filter by filter tags
+      const devSettings = PreferenceHolder.get().deviceSettings ?? {}
       const filtered = this.devices.filter(device => {
-        return device.display_name.toLowerCase().includes(this.search.toLowerCase().trim()) && (!prefs || prefs.disabled || prefs.tags.includes(device.online ? device.drive_status : 'offline'))
+        const disp = devSettings[device.device_id]?.displayName ?? device.display_name
+        return disp.toLowerCase().includes(this.search.toLowerCase().trim()) && (!prefs || prefs.disabled || prefs.tags.includes(device.online ? device.drive_status : 'offline'))
       })
 
       if (sort) {
-        const devSettings = PreferenceHolder.get().deviceSettings ?? {}
         if (sort === "asc") {
           filtered.sort((a, b) => {
             const namea = devSettings[a.device_id]?.displayName ?? a.display_name.toLowerCase()
@@ -230,5 +269,43 @@ export default {
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 20px;
+}
+
+.icon-selector {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+.icon-selector-body {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, .4);
+  flex-wrap: wrap;
+  width: 100%;
+}
+.icon-selector-header {
+  font-size: 14px;
+  font-weight: normal;
+  margin-bottom: 18px;
+}
+
+.icon-selector-icon {
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all .2s ease-in;
+  user-select: none;
+}
+.icon-selector-icon:hover, .icon-selector-icon.selected {
+  background: rgba(111, 111, 111, .2);
 }
 </style>

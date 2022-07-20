@@ -1,10 +1,8 @@
 import { Requests } from ".";
-import { apiStore } from "../stores";
 
 function Holder () {
     let data = [];
     let updateFuncs = []
-    const store = apiStore;
     // get data from API URL
     async function refresh() {
         try {
@@ -20,7 +18,6 @@ function Holder () {
         for (const func of updateFuncs) {
             if (func) func(data);
         }
-        store.data = data;
 
         return data;
     }
@@ -49,7 +46,6 @@ function Holder () {
         for (const func of updateFuncs) {
             if (func) func(data);
         }
-        store.data = data;
 
         return data;
     }
@@ -63,7 +59,6 @@ function Holder () {
         onUpdate,
         removeUpdate,
         manualUpdate,
-        store,
         interval
     }
 }

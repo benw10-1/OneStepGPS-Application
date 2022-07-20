@@ -64,15 +64,18 @@ export default {
     },
     methods: {
         prefUpdate(prefs) {
+            // load state
             this.checked = prefs.filter?.tags ?? this.tags
             this.disabled = prefs.filter?.disabled ?? false
         },
         onChange(tag) {
+            // toggle tag
             if (this.checked.includes(tag)) {
                 this.checked = this.checked.filter(t => t !== tag)
             } else {
                 this.checked = [...this.checked, tag]
             }
+            // override prefs
             preferenceHolder.set({
                 filter: {
                     tags: this.checked,
@@ -96,13 +99,6 @@ export default {
             })
         },
     },
-    // watch: {
-    //     disabled(newValue) {
-    //         if (newValue) {
-    //             this.collapse()
-    //         }
-    //     },
-    // },
 }
 </script>
 
