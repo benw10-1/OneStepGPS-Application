@@ -7,6 +7,7 @@ function PrefHolder () {
     let updateFuncs = [];
 
     function onUpdate(callback) {
+        if (typeof callback !== 'function') return -1
         updateFuncs.push(callback);
         return updateFuncs.length - 1;
     }
@@ -34,7 +35,7 @@ function PrefHolder () {
 
         data = { ...data, ...data_ };
         
-        updateFuncs.forEach(func => {if (func_ !== func) func(data)});
+        updateFuncs.forEach(func => {if (func_ !== func) func(data);});
         
         await Requests.setPreferences(data);
 
@@ -45,7 +46,7 @@ function PrefHolder () {
         return Requests.getPreferences().then(data_ => {
             if (!data_) return
             data = { ...data, ...data_ };
-            updateFuncs.forEach(func => func(data));
+            updateFuncs.forEach(func => {func(data)});
         });
     }
 

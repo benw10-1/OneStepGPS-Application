@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-document.title = "Login"
+    document.title = "Login"
 </script>
 
 <script>

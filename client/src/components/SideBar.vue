@@ -40,7 +40,8 @@
 </template>
 
 <script>
-import { Holder, PreferenceHolder } from '../helpers'
+import { PreferenceHolder, deviceStore } from '../helpers'
+import { mapState } from 'pinia'
 import SVGIcon from './SVGIcon.vue'
 import CustomInput from './CustomInput.vue'
 import DeviceComponent from './Device.vue'
@@ -58,11 +59,9 @@ export default {
     SVGIcon,
   },
   mounted() {
-    Holder.onUpdate(this.updateDevices)
     PreferenceHolder.onUpdate(this.refreshDevices)
   },
   unmounted() {
-    Holder.removeUpdate(this.updateDevices)
     PreferenceHolder.removeUpdate(this.refreshDevices)
   },
   props: {
@@ -77,10 +76,11 @@ export default {
       default: null
     },
   },
+  computed: {
+    ...mapState(deviceStore, ['devices']),
+  },
   data() {
     return {
-      // all devices
-      devices: [],
       search: '',
       // filtered devices to display
       display: [],
@@ -150,14 +150,9 @@ export default {
     locateDevice(device) {
       if (this.select) this.select(device)
     },
-    refreshDevices() {
-      this.updateDevices(this.devices)
-    },
-    updateDevices(data) {
+    updateDisplay(data) {
       if (!data) return
-      // create copy of array to always trigger rerender
-      this.devices = data instanceof Array ? [...data] : { ...data }
-      this.display = this.filtered()
+      this.display = this.filtered(data)
       if (this.firstLoad) {
         this.firstLoad = false
         this.$emit("loaded")
@@ -168,13 +163,13 @@ export default {
       this.display = this.filtered()
     },
     // simple JS sort function to sort devices by display name
-    filtered() {
+    filtered(data) {
       // prefrences get
       const prefs = PreferenceHolder.get()?.filter
       const sort = PreferenceHolder.get()?.sort === "none" ? null : PreferenceHolder.get()?.sort
       // filter by filter tags
       const devSettings = PreferenceHolder.get().deviceSettings ?? {}
-      const filtered = this.devices.filter(device => {
+      const filtered = data.filter(device => {
         const disp = devSettings[device.device_id]?.displayName ?? device.display_name
         return disp.toLowerCase().includes(this.search.toLowerCase().trim()) && (!prefs || prefs.disabled || prefs.tags.includes(device.online ? device.drive_status : 'offline'))
       })
@@ -198,7 +193,14 @@ export default {
 
       return filtered
     },
-  }
+  },
+  watch: {
+    devices: {
+      handler(data) {
+        this.updateDisplay(data)
+      },
+    },
+  },
 }
 </script>
 

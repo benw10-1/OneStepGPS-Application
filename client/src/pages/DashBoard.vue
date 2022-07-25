@@ -13,14 +13,15 @@
 </template>
 
 <script setup>
-document.title = "Dashboard"
+    document.title = "Dashboard"
 </script>
 
 <script>
 import SideBar from '../components/SideBar.vue'
 import MapComponent from '../components/MapComponent.vue'
 import "../assets/one-step.png"
-import { PreferenceHolder } from '@/helpers';
+import { PreferenceHolder, deviceStore } from '@/helpers';
+import { mapActions } from 'pinia';
 
 export default {
     name: 'DashBoard',
@@ -38,6 +39,7 @@ export default {
         }
     },
     methods: {
+        ...mapActions(deviceStore, ['startInterval', 'stopInterval', 'refreshDevices']),
         // loading triggers + handlers
         setSideLoad(loaded) {
             this.sideLoaded = loaded
@@ -63,6 +65,11 @@ export default {
         PreferenceHolder.preferenceReq().then(() => {
             this.prefLoad = true
         })
+        this.refreshDevices()
+        this.startInterval()
+    },
+    unmounted() {
+        this.stopInterval()
     },
 }
 </script>

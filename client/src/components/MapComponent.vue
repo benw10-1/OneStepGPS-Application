@@ -40,7 +40,8 @@
 </template>
 
 <script>
-import { Holder, PreferenceHolder, Auth } from '../helpers'
+import { PreferenceHolder, Auth, deviceStore } from '../helpers'
+import { mapState } from 'pinia';
 import "leaflet/dist/leaflet.css";
 import L from "leaflet"
 import SwitchSetting from './SwitchSetting.vue';
@@ -56,31 +57,28 @@ export default {
     },
     // add our rerender triggers to our data updater and initalialize map and resize trigger
     mounted() {
-        Holder.refresh()
-        Holder.onUpdate(this.updateDevices)
         PreferenceHolder.onUpdate(this.updateSettings)
         this.initMap()
         window.addEventListener('resize', this.resizer)
     },
     // remove our rerender triggers from our data updater and remove map and resize trigger
     unmounted() {
-        Holder.removeUpdate(this.updateDevices)
         PreferenceHolder.removeUpdate(this.updateSettings)
         window.removeEventListener('resize', this.resizer)
         if (this.map) {
             this.map.remove()
         }
     },
+    computed: {
+        ...mapState(deviceStore, ['devices']),
+    },
     data() {
         return {
-            // all devices
-            devices: [],
             search: '',
             // filtered devices to display
             display: [],
             map: null,
-            center: [0, 0],
-            first: true,
+            fitDevices: false,
             featureLayer: null,
             loaded: false,
             tileLayer: null,
@@ -99,15 +97,13 @@ export default {
                 mapDisplay: 'STREET',
             },
             selected: null,
-            selectTrigger: false,
         }
     },
     methods: {
         select(device) {
             this.selected = device
             if (device) this.moveCenter([device.lat, device.lng])
-            this.updateDevices(this.devices)
-            this.selectTrigger = !this.selectTrigger
+            this.updateDisplay(this.devices)
         },
         deselect() {
             this.selected = null
@@ -147,15 +143,13 @@ export default {
             this.featureLayer.addTo(map)
         },
         // main update method
-        updateDevices(data) {
-            if (!data.length) {
-                this.first = true
+        updateDisplay(data) {
+            if (!data || !data.length) {
+                this.fitDevices = true
                 return
             }
-            // create copy of array to always trigger rerender
-            this.devices = data instanceof Array ? [...data] : { ...data }
             const prefs = PreferenceHolder.get()?.deviceSettings ?? {}
-            this.display = this.devices.filter((d) => {
+            this.display = data.filter((d) => {
                 if (prefs[d.device_id]) {
                     return prefs[d.device_id].visible === undefined || prefs[d.device_id].visible
                 } else {
@@ -164,18 +158,17 @@ export default {
             })
             // if map is loaded, update map
             if (this.map && this.loaded) {
-                if (this.first) {
-                    this.first = false
-                    // center map on a box that contains all devices
-                    if (this.devices.length) this.map.fitBounds(this.getDevicesView())
+                if (this.fitDevices) {
+                    this.fitDevices = false
                     // resize map after loading
                     this.map.invalidateSize()
+                    // center map on a box that contains all devices
+                    if (data.length) this.map.fitBounds(this.getDevicesView())
                 }
 
                 if (this.display.length && this.featureLayer) {
                     this.featureLayer.clearLayers()
                     // remap all of our features to new devices
-                    this.selectTrigger = !this.selectTrigger
                     this.geoJSON.addData(this.display.map((device, i) => {
                         // console.log(device)
                         return {
@@ -198,10 +191,9 @@ export default {
                                 color: device.online ? this.colors[device.drive_status] : this.colors['offline'],
                                 speed: device.speed,
                                 selected: this.selected?.device_id === device.device_id,
-                                trigger: this.selectTrigger,
                             }
                         }
-                    }).filter(x => x))
+                    }))
                 }
             }
         },
@@ -215,7 +207,6 @@ export default {
             }
             if (settings.cluster !== undefined) this.changeCluster(settings.cluster)
             if (settings.mapDisplay) {
-                console.log("preffed")
                 this.changeMapType(settings.mapDisplay?.toLowerCase())
             }
             this.settings = {
@@ -223,11 +214,11 @@ export default {
                 ...settings,
             }
             if (safe) PreferenceHolder.set({ mapSettings: this.settings }, this.updateSettings)
-            this.updateDevices(this.devices)
+            this.updateDisplay(this.devices)
         },
         changeMapType(type, map = this.map) {
             type = type?.toLowerCase()
-            console.log(type)
+
             if (!this.tileLayer) {
                 this.tileLayer = L.tileLayer(null, {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -349,14 +340,14 @@ export default {
                         moveCenter: this.moveCenter,
                         select: this.select
                     })
-                    this.updateDevices(this.devices)
+                    this.updateDisplay(this.devices)
                 }, 50)
                 this.map = map
             })
             map.on("click", () => {
                 this.select(null)
             })
-            const preventDouble = function (el) {
+            const preventActions = function (el) {
                 L.DomEvent.on(el, 'click', L.DomEvent.stopPropagation);
                 L.DomEvent.on(el, 'click', L.DomEvent.preventDefault);
                 L.DomEvent.on(el, 'dblclick', L.DomEvent.stopPropagation);
@@ -386,20 +377,20 @@ export default {
                     const zoomOutMap = L.DomUtil.create('span', 'material-icons-outlined', zoomOutMapButton);
                     zoomOutMap.innerHTML = 'zoom_out_map';
 
-                    preventDouble(container)
+                    preventActions(container)
 
-                    preventDouble(zoomInButton)
+                    preventActions(zoomInButton)
                     L.DomEvent.on(zoomInButton, 'click', (e) => {
                         e.currentTarget.blur();
                         map.zoomIn();
                     });
 
-                    preventDouble(zoomOutButton)
+                    preventActions(zoomOutButton)
                     L.DomEvent.on(zoomOutButton, 'click', (e) => {
                         e.currentTarget.blur();
                         map.zoomOut();
                     });
-                    preventDouble(zoomOutMapButton)
+                    preventActions(zoomOutMapButton)
                     L.DomEvent.on(zoomOutMapButton, 'click', (e) => {
                         e.currentTarget.blur();
                         map.fitBounds(parent.getDevicesView());
@@ -421,8 +412,8 @@ export default {
                     const settings = L.DomUtil.create('span', 'material-icons', settingsButton);
                     settings.innerHTML = 'settings';
 
-                    preventDouble(container)
-                    preventDouble(settingsButton)
+                    preventActions(container)
+                    preventActions(settingsButton)
                     L.DomEvent.on(settingsButton, 'click', () => {
                         parent.showSettingsPanel()
                     })
@@ -438,11 +429,10 @@ export default {
             L.control.settings({ position: 'topright' }).addTo(map);
             L.control.viewControls({ position: 'topleft' }).addTo(map);
             // arbitrary default zoom level
-            map.setView(this.center, 13)
+            map.setView([0, 0], 13)
         },
         moveCenter(lat, lng) {
             this.map.panTo(L.latLng(lat, lng), 12)
-            this.center = [lat, lng]
         },
         // return bounding box of all viewable devices
         getDevicesView() {
@@ -475,6 +465,13 @@ export default {
         resizer() {
             this.map.invalidateSize()
             this.$forceUpdate()
+        },
+    },
+    watch: {
+        devices: {
+            handler(newDevices) {
+                this.updateDisplay(newDevices)
+            },
         },
     },
 }
