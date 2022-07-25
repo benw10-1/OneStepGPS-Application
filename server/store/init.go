@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"sync"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,13 +28,13 @@ type CleanUser struct {
 }
 
 // Structure of the JSON file
-type JSONStruct struct {
+type MemoryStorage struct {
 	Users   []User
 	UserMap map[string]*User
 }
 
 // Declare all methods
-type JSONStructor interface {
+type MemoryStorageMethods interface {
 	AddUser(name string, password string, apiKey string)
 	GetUser(name string) *User
 	RemoveUser(name string)
@@ -48,11 +50,11 @@ type JSONStructor interface {
 }
 
 // Indirectly implement the GetUsers method
-func (x *JSONStruct) GetUsers() []User {
+func (x *MemoryStorage) GetUsers() []User {
 	return x.Users
 }
 
-func (x *JSONStruct) UpdateUserMap() {
+func (x *MemoryStorage) UpdateUserMap() {
 	userMap := make(map[string]*User)
 	for i, user := range x.Users {
 		userMap[user.Name] = &x.Users[i]
@@ -61,7 +63,7 @@ func (x *JSONStruct) UpdateUserMap() {
 }
 
 // API proxy (no CORS on the server)
-func (x *JSONStruct) GetDevices(name string) string {
+func (x *MemoryStorage) GetDevices(name string) string {
 	// Get the user
 	if user, ok := x.UserMap[name]; ok {
 		if user.APIKey == "" {
@@ -90,7 +92,7 @@ func (x *JSONStruct) GetDevices(name string) string {
 	return ""
 }
 
-func (x *JSONStruct) ReverseGeocode(name string, lat string, lon string) string {
+func (x *MemoryStorage) ReverseGeocode(name string, lat string, lon string) string {
 	// Get the user
 	if user, ok := x.UserMap[name]; ok {
 		if user.APIKey == "" {
@@ -119,7 +121,7 @@ func (x *JSONStruct) ReverseGeocode(name string, lat string, lon string) string 
 }
 
 // Checks if the user name and API key are unique
-func (x *JSONStruct) IsUnique(name string, apiKey string) bool {
+func (x *MemoryStorage) IsUnique(name string, apiKey string) bool {
 	if _, ok := x.UserMap[name]; ok {
 		return false
 	}
@@ -127,7 +129,7 @@ func (x *JSONStruct) IsUnique(name string, apiKey string) bool {
 }
 
 // Creates a new user in the store
-func (x *JSONStruct) AddUser(name string, password string, apiKey string) bool {
+func (x *MemoryStorage) AddUser(name string, password string, apiKey string) bool {
 	// Check if the user name and API key are unique
 	unique := x.IsUnique(name, apiKey)
 	if !unique {
@@ -150,7 +152,7 @@ func (x *JSONStruct) AddUser(name string, password string, apiKey string) bool {
 }
 
 // Validate the user name and password
-func (x *JSONStruct) CorrectCredentials(name string, password string) bool {
+func (x *MemoryStorage) CorrectCredentials(name string, password string) bool {
 	if user, ok := x.UserMap[name]; ok {
 		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 		if err == nil {
@@ -161,14 +163,14 @@ func (x *JSONStruct) CorrectCredentials(name string, password string) bool {
 }
 
 // Get a user from the store
-func (x *JSONStruct) GetUser(name string) *CleanUser {
+func (x *MemoryStorage) GetUser(name string) *CleanUser {
 	if user, ok := x.UserMap[name]; ok {
 		return &CleanUser{user.Name, user.APIKey}
 	}
 	return nil
 }
 
-func (x *JSONStruct) GetFullUser(name string) *User {
+func (x *MemoryStorage) GetFullUser(name string) *User {
 	if user, ok := x.UserMap[name]; ok {
 		return user
 	}
@@ -176,7 +178,7 @@ func (x *JSONStruct) GetFullUser(name string) *User {
 }
 
 // Remove a user from the store
-func (x *JSONStruct) RemoveUser(name string) bool {
+func (x *MemoryStorage) RemoveUser(name string) bool {
 	for i, user := range x.GetUsers() {
 		if user.Name == name {
 			x.Users = append(x.Users[:i], x.Users[i+1:]...)
@@ -188,7 +190,7 @@ func (x *JSONStruct) RemoveUser(name string) bool {
 }
 
 // Gets a user's preferences
-func (x *JSONStruct) GetPreferences(name string) map[string]interface{} {
+func (x *MemoryStorage) GetPreferences(name string) map[string]interface{} {
 	if user, ok := x.UserMap[name]; ok {
 		return user.Preferences
 	}
@@ -196,14 +198,14 @@ func (x *JSONStruct) GetPreferences(name string) map[string]interface{} {
 }
 
 // Sets a user's preferences
-func (x *JSONStruct) SetPreferences(name string, preferences map[string]interface{}) {
+func (x *MemoryStorage) SetPreferences(name string, preferences map[string]interface{}) {
 	if user, ok := x.UserMap[name]; ok {
 		user.Preferences = preferences
 	}
 }
 
 // Sets a user's API key
-func (x *JSONStruct) SetAPIKey(name string, apiKey string) *CleanUser {
+func (x *MemoryStorage) SetAPIKey(name string, apiKey string) *CleanUser {
 	if user, ok := x.UserMap[name]; ok {
 		user.APIKey = apiKey
 		return &CleanUser{user.Name, apiKey}
@@ -213,29 +215,30 @@ func (x *JSONStruct) SetAPIKey(name string, apiKey string) *CleanUser {
 }
 
 // Interface for the data store
-type Storer interface {
-	Get() (*JSONStruct, error)
+type StoreMethods interface {
+	Get() (*MemoryStorage, error)
 	Save() error
 }
 
 // Top-level data store struct
 type DataStore struct {
-	dataRef  *JSONStruct
-	filepath string
+	dataRef    *MemoryStorage
+	filepath   string
+	accessLock sync.Mutex
 }
 
 // Get the data stored in the store
-func (x *DataStore) Get() *JSONStruct {
+func (x *DataStore) Get() *MemoryStorage {
+	x.accessLock.Lock()
+	defer x.accessLock.Unlock()
 	return x.dataRef
-}
-
-type Clear struct {
-	Users   []User
-	UserMap map[string]*User
 }
 
 // Save the data stored in the store
 func (x *DataStore) Save() error {
+	x.accessLock.Lock()
+	defer x.accessLock.Unlock()
+
 	data, err := json.Marshal(x.dataRef.Users)
 	if err != nil {
 		fmt.Println("Error marshalling data")
@@ -259,7 +262,7 @@ func initStore(filepath string) *DataStore {
 
 	store := &DataStore{}
 	store.filepath = filepath
-	store.dataRef = &JSONStruct{
+	store.dataRef = &MemoryStorage{
 		Users:   []User{},
 		UserMap: make(map[string]*User),
 	}

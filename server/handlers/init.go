@@ -24,8 +24,8 @@ type LoginStruct struct {
 }
 
 // Function and object aliases
-var jsonStruct = store.Store.Get()
-var save = store.Store.Save
+var memoryLayer = store.Store.Get()
+var saveToFile = store.Store.Save
 
 // Auth constructor
 func SignAuth(user *store.CleanUser) Auth {
@@ -50,7 +50,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	// verify user
-	correct := jsonStruct.CorrectCredentials(user.Name, user.Password)
+	correct := memoryLayer.CorrectCredentials(user.Name, user.Password)
 
 	if !correct {
 		c.JSON(200, gin.H{
@@ -60,7 +60,7 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": SignAuth(jsonStruct.GetUser(user.Name)),
+		"result": SignAuth(memoryLayer.GetUser(user.Name)),
 	})
 }
 
@@ -76,8 +76,8 @@ func SignUp(c *gin.Context) {
 		return
 	}
 	// verify user
-	added := jsonStruct.AddUser(user.Name, user.Password, "")
-	save()
+	added := memoryLayer.AddUser(user.Name, user.Password, "")
+	saveToFile()
 
 	if !added {
 		c.JSON(200, gin.H{
@@ -87,7 +87,7 @@ func SignUp(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"result": SignAuth(jsonStruct.GetUser(user.Name)),
+		"result": SignAuth(memoryLayer.GetUser(user.Name)),
 	})
 }
 
@@ -109,14 +109,14 @@ func SetAPIKey(c *gin.Context) {
 		return
 	}
 	// update preferences
-	updateUser := jsonStruct.SetAPIKey(user.(store.CleanUser).Name, data["key"])
-	validKey := jsonStruct.GetDevices(user.(store.CleanUser).Name)
-	save()
+	updateUser := memoryLayer.SetAPIKey(user.(store.CleanUser).Name, data["key"])
+	validKey := memoryLayer.GetDevices(user.(store.CleanUser).Name)
+	saveToFile()
 
 	if strings.Contains(validKey, "Invalid API") {
 		// invalid key
-		jsonStruct.SetAPIKey(user.(store.CleanUser).Name, "")
-		save()
+		memoryLayer.SetAPIKey(user.(store.CleanUser).Name, "")
+		saveToFile()
 		c.JSON(200, gin.H{
 			"error": "Invalid API key",
 		})
@@ -137,7 +137,7 @@ func GetDevices(c *gin.Context) {
 		return
 	}
 	// get devices
-	devices := jsonStruct.GetDevices(user.(store.CleanUser).Name)
+	devices := memoryLayer.GetDevices(user.(store.CleanUser).Name)
 
 	data := make(map[string]interface{})
 	err := json.Unmarshal([]byte(devices), &data)
@@ -173,7 +173,7 @@ func ReverseGeocode(c *gin.Context) {
 		return
 	}
 
-	lookup := jsonStruct.ReverseGeocode(user.(store.CleanUser).Name, data["lat"], data["lon"])
+	lookup := memoryLayer.ReverseGeocode(user.(store.CleanUser).Name, data["lat"], data["lon"])
 
 	data_ := make(map[string]interface{})
 	err = json.Unmarshal([]byte(lookup), &data_)
@@ -203,7 +203,7 @@ func Preferences(c *gin.Context) {
 	cleaned := user.(store.CleanUser)
 
 	if c.Request.Method == "GET" {
-		preferences := jsonStruct.GetPreferences(cleaned.Name)
+		preferences := memoryLayer.GetPreferences(cleaned.Name)
 		fmt.Println(preferences)
 		c.JSON(200, gin.H{
 			"result": preferences,
@@ -220,8 +220,8 @@ func Preferences(c *gin.Context) {
 		}
 
 		// update preferences
-		jsonStruct.SetPreferences(cleaned.Name, data)
-		save()
+		memoryLayer.SetPreferences(cleaned.Name, data)
+		saveToFile()
 
 		c.JSON(200, gin.H{
 			"result": "Success",
