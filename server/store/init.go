@@ -28,13 +28,13 @@ type CleanUser struct {
 }
 
 // Structure of the JSON file
-type MemoryStorage struct {
+type UserStorage struct {
 	Users   []User
 	UserMap map[string]*User
 }
 
 // Declare all methods
-type MemoryStorageMethods interface {
+type userStorageMethods interface {
 	AddUser(name string, password string, apiKey string)
 	GetUser(name string) *User
 	RemoveUser(name string)
@@ -50,11 +50,11 @@ type MemoryStorageMethods interface {
 }
 
 // Indirectly implement the GetUsers method
-func (x *MemoryStorage) GetUsers() []User {
+func (x *UserStorage) GetUsers() []User {
 	return x.Users
 }
 
-func (x *MemoryStorage) UpdateUserMap() {
+func (x *UserStorage) UpdateUserMap() {
 	userMap := make(map[string]*User)
 	for i, user := range x.Users {
 		userMap[user.Name] = &x.Users[i]
@@ -63,7 +63,7 @@ func (x *MemoryStorage) UpdateUserMap() {
 }
 
 // API proxy (no CORS on the server)
-func (x *MemoryStorage) GetDevices(name string) string {
+func (x *UserStorage) GetDevices(name string) string {
 	// Get the user
 	if user, ok := x.UserMap[name]; ok {
 		if user.APIKey == "" {
@@ -92,7 +92,7 @@ func (x *MemoryStorage) GetDevices(name string) string {
 	return ""
 }
 
-func (x *MemoryStorage) ReverseGeocode(name string, lat string, lon string) string {
+func (x *UserStorage) ReverseGeocode(name string, lat string, lon string) string {
 	// Get the user
 	if user, ok := x.UserMap[name]; ok {
 		if user.APIKey == "" {
@@ -121,7 +121,7 @@ func (x *MemoryStorage) ReverseGeocode(name string, lat string, lon string) stri
 }
 
 // Checks if the user name and API key are unique
-func (x *MemoryStorage) IsUnique(name string, apiKey string) bool {
+func (x *UserStorage) IsUnique(name string, apiKey string) bool {
 	if _, ok := x.UserMap[name]; ok {
 		return false
 	}
@@ -129,7 +129,7 @@ func (x *MemoryStorage) IsUnique(name string, apiKey string) bool {
 }
 
 // Creates a new user in the store
-func (x *MemoryStorage) AddUser(name string, password string, apiKey string) bool {
+func (x *UserStorage) AddUser(name string, password string, apiKey string) bool {
 	// Check if the user name and API key are unique
 	unique := x.IsUnique(name, apiKey)
 	if !unique {
@@ -152,7 +152,7 @@ func (x *MemoryStorage) AddUser(name string, password string, apiKey string) boo
 }
 
 // Validate the user name and password
-func (x *MemoryStorage) CorrectCredentials(name string, password string) bool {
+func (x *UserStorage) CorrectCredentials(name string, password string) bool {
 	if user, ok := x.UserMap[name]; ok {
 		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 		if err == nil {
@@ -163,14 +163,14 @@ func (x *MemoryStorage) CorrectCredentials(name string, password string) bool {
 }
 
 // Get a user from the store
-func (x *MemoryStorage) GetUser(name string) *CleanUser {
+func (x *UserStorage) GetUser(name string) *CleanUser {
 	if user, ok := x.UserMap[name]; ok {
 		return &CleanUser{user.Name, user.APIKey}
 	}
 	return nil
 }
 
-func (x *MemoryStorage) GetFullUser(name string) *User {
+func (x *UserStorage) GetFullUser(name string) *User {
 	if user, ok := x.UserMap[name]; ok {
 		return user
 	}
@@ -178,7 +178,7 @@ func (x *MemoryStorage) GetFullUser(name string) *User {
 }
 
 // Remove a user from the store
-func (x *MemoryStorage) RemoveUser(name string) bool {
+func (x *UserStorage) RemoveUser(name string) bool {
 	for i, user := range x.GetUsers() {
 		if user.Name == name {
 			x.Users = append(x.Users[:i], x.Users[i+1:]...)
@@ -190,7 +190,7 @@ func (x *MemoryStorage) RemoveUser(name string) bool {
 }
 
 // Gets a user's preferences
-func (x *MemoryStorage) GetPreferences(name string) map[string]interface{} {
+func (x *UserStorage) GetPreferences(name string) map[string]interface{} {
 	if user, ok := x.UserMap[name]; ok {
 		return user.Preferences
 	}
@@ -198,14 +198,14 @@ func (x *MemoryStorage) GetPreferences(name string) map[string]interface{} {
 }
 
 // Sets a user's preferences
-func (x *MemoryStorage) SetPreferences(name string, preferences map[string]interface{}) {
+func (x *UserStorage) SetPreferences(name string, preferences map[string]interface{}) {
 	if user, ok := x.UserMap[name]; ok {
 		user.Preferences = preferences
 	}
 }
 
 // Sets a user's API key
-func (x *MemoryStorage) SetAPIKey(name string, apiKey string) *CleanUser {
+func (x *UserStorage) SetAPIKey(name string, apiKey string) *CleanUser {
 	if user, ok := x.UserMap[name]; ok {
 		user.APIKey = apiKey
 		return &CleanUser{user.Name, apiKey}
@@ -216,19 +216,19 @@ func (x *MemoryStorage) SetAPIKey(name string, apiKey string) *CleanUser {
 
 // Interface for the data store
 type StoreMethods interface {
-	Get() (*MemoryStorage, error)
+	Get() (*UserStorage, error)
 	Save() error
 }
 
 // Top-level data store struct
 type DataStore struct {
-	dataRef    *MemoryStorage
+	dataRef    *UserStorage
 	filepath   string
 	accessLock sync.Mutex
 }
 
 // Get the data stored in the store
-func (x *DataStore) Get() *MemoryStorage {
+func (x *DataStore) Get() *UserStorage {
 	x.accessLock.Lock()
 	defer x.accessLock.Unlock()
 	return x.dataRef
@@ -262,7 +262,7 @@ func initStore(filepath string) *DataStore {
 
 	store := &DataStore{}
 	store.filepath = filepath
-	store.dataRef = &MemoryStorage{
+	store.dataRef = &UserStorage{
 		Users:   []User{},
 		UserMap: make(map[string]*User),
 	}
