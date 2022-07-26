@@ -1,15 +1,15 @@
 import Requests from './requests';
 import Auth from './auth';
-import PreferenceHolder from './preferenceHolder';
 import dateFormatter from './dateFormatter';
 import locationCache from './locationCache';
 import deviceStore from './devicesStore';
+import settingsStore from './settingsStore';
 
 export {
     Auth,
     Requests,
-    PreferenceHolder,
     dateFormatter,
     deviceStore,
-    locationCache
+    locationCache,
+    settingsStore
 };

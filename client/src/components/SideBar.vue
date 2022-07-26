@@ -14,7 +14,7 @@
     </div>
     <div class="devices-container">
       <DeviceComponent v-for="device of display" :device="device" v-bind:key="device.device_id" @edit="editDevice"
-        @locate="locateDevice" @drag="() => {console.log('dragged')}" />
+        @locate="locateDevice" @drag="() => { console.log('dragged') }" />
     </div>
   </div>
   <Teleport to="body">
@@ -28,7 +28,8 @@
           <div class="icon-selector">
             <div class="icon-selector-header">Icon</div>
             <div class="icon-selector-body">
-              <div class="icon-selector-icon" v-for="key in Object.keys(svgMap)" :key="key" @click="() => {updateIcon(key)}" :class="{selected: icon === key}">
+              <div class="icon-selector-icon" v-for="key in Object.keys(svgMap)" :key="key"
+                @click="() => { updateIcon(key) }" :class="{ selected: icon === key }">
                 <SVGIcon :icon="key" />
               </div>
             </div>
@@ -40,8 +41,8 @@
 </template>
 
 <script>
-import { PreferenceHolder, deviceStore } from '../helpers'
-import { mapState } from 'pinia'
+import { deviceStore, settingsStore } from '../helpers'
+import { mapState, mapActions } from 'pinia'
 import SVGIcon from './SVGIcon.vue'
 import CustomInput from './CustomInput.vue'
 import DeviceComponent from './Device.vue'
@@ -58,12 +59,6 @@ export default {
     SortBar,
     SVGIcon,
   },
-  mounted() {
-    PreferenceHolder.onUpdate(this.refreshDevices)
-  },
-  unmounted() {
-    PreferenceHolder.removeUpdate(this.refreshDevices)
-  },
   props: {
     // map controller
     setMapCenter: {
@@ -78,6 +73,7 @@ export default {
   },
   computed: {
     ...mapState(deviceStore, ['devices']),
+    ...mapState(settingsStore, ['sortSettings', 'filterSettings', 'deviceSettings', "settings"]),
   },
   data() {
     return {
@@ -93,10 +89,11 @@ export default {
     }
   },
   methods: {
+    ...mapActions(settingsStore, ['updateDeviceSettings']),
     editDevice(device) {
       this.editingDevice = device
       // get cached display name and icon
-      const pref = PreferenceHolder.get().deviceSettings?.[device.device_id] ?? {}
+      const pref = this.deviceSettings(device.device_id)
       this.displayName = pref.displayName || device.display_name
       this.icon = pref.icon || 'car'
       window.addEventListener("click", this.stopEditing)
@@ -106,32 +103,12 @@ export default {
     },
     updateDisplayname() {
       if (!this.editingDevice || !this.displayName) return false
-      const prev = PreferenceHolder.get().deviceSettings ?? {}
-      // overwrite display name
-      PreferenceHolder.set({
-        deviceSettings: {
-          ...prev,
-          [this.editingDevice.device_id]: {
-            ...prev?.[this.editingDevice.device_id] ?? {},
-            displayName: this.displayName.trim()
-          }
-        }
-      })
+      this.updateDeviceSettings(this.editingDevice.device_id, { displayName: this.displayName.trim() })
     },
     updateIcon(icon) {
       if (!this.editingDevice || !this.icon) return false
-      const prev = PreferenceHolder.get().deviceSettings ?? {}
       this.icon = icon
-      // overwrite icon
-      PreferenceHolder.set({
-        deviceSettings: {
-          ...prev,
-          [this.editingDevice.device_id]: {
-            ...prev?.[this.editingDevice.device_id] ?? {},
-            icon: this.icon
-          }
-        }
-      })
+      this.updateDeviceSettings(this.editingDevice.device_id, { icon: this.icon })
     },
     stopEditing(e) {
       // ignores close button
@@ -160,35 +137,29 @@ export default {
     },
     setSearch(search) {
       this.search = search
-      this.display = this.filtered()
+      this.display = this.filtered(this.devices)
     },
     // simple JS sort function to sort devices by display name
     filtered(data) {
       // prefrences get
-      const prefs = PreferenceHolder.get()?.filter
-      const sort = PreferenceHolder.get()?.sort === "none" ? null : PreferenceHolder.get()?.sort
+      const filter = this.filterSettings
+      const sort = this.sortSettings === "none" ? null : this.sortSettings
       // filter by filter tags
-      const devSettings = PreferenceHolder.get().deviceSettings ?? {}
       const filtered = data.filter(device => {
-        const disp = devSettings[device.device_id]?.displayName ?? device.display_name
-        return disp.toLowerCase().includes(this.search.toLowerCase().trim()) && (!prefs || prefs.disabled || prefs.tags.includes(device.online ? device.drive_status : 'offline'))
+        const deviceSetting = this.deviceSettings(device.device_id)
+        const displayName = (deviceSetting.displayName ?? device.display_name).toLowerCase()
+
+        return (!filter || filter.disabled || filter?.tags?.includes(device.online ? device.drive_status : 'offline')) && displayName.includes(this.search.toLowerCase().trim())
       })
 
       if (sort) {
-        if (sort === "asc") {
-          filtered.sort((a, b) => {
-            const namea = devSettings[a.device_id]?.displayName ?? a.display_name.toLowerCase()
-            const nameb = devSettings[b.device_id]?.displayName ?? b.display_name.toLowerCase()
-            return namea.localeCompare(nameb)
-          })
-        }
-        else {
-          filtered.sort((a, b) => {
-            const namea = devSettings[a.device_id]?.displayName ?? a.display_name.toLowerCase()
-            const nameb = devSettings[b.device_id]?.displayName ?? b.display_name.toLowerCase()
-            return nameb.localeCompare(namea)
-          })
-        }
+        filtered.sort((a, b) => {
+          const namea = (this.deviceSettings(a.device_id)?.displayName ?? a.display_name).toLowerCase()
+          const nameb = (this.deviceSettings(b.device_id)?.displayName ?? b.display_name).toLowerCase()
+
+          if (sort === "asc") return namea.localeCompare(nameb)
+          else return nameb.localeCompare(namea)
+        })
       }
 
       return filtered
@@ -199,6 +170,12 @@ export default {
       handler(data) {
         this.updateDisplay(data)
       },
+    },
+    settings: {
+      handler() {
+        this.updateDisplay(this.devices)
+      },
+      deep: true,
     },
   },
 }
@@ -280,6 +257,7 @@ export default {
   flex-direction: column;
   margin-top: 10px;
 }
+
 .icon-selector-body {
   display: flex;
   flex-direction: row;
@@ -289,6 +267,7 @@ export default {
   flex-wrap: wrap;
   width: 100%;
 }
+
 .icon-selector-header {
   font-size: 14px;
   font-weight: normal;
@@ -307,7 +286,9 @@ export default {
   transition: all .2s ease-in;
   user-select: none;
 }
-.icon-selector-icon:hover, .icon-selector-icon.selected {
+
+.icon-selector-icon:hover,
+.icon-selector-icon.selected {
   background: rgba(111, 111, 111, .2);
 }
 </style>

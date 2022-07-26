@@ -40,15 +40,14 @@
 </template>
 
 <script>
-import { PreferenceHolder, Auth, deviceStore } from '../helpers'
-import { mapState } from 'pinia';
+import { Auth, deviceStore, settingsStore } from '../helpers'
+import { mapState, mapActions } from 'pinia';
 import "leaflet/dist/leaflet.css";
 import L from "leaflet"
 import SwitchSetting from './SwitchSetting.vue';
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster/dist/leaflet.markercluster-src.js";
-// import "leaflet-rotatedmarker"
 
 export default {
     name: 'MapComponent',
@@ -57,13 +56,11 @@ export default {
     },
     // add our rerender triggers to our data updater and initalialize map and resize trigger
     mounted() {
-        PreferenceHolder.onUpdate(this.updateSettings)
         this.initMap()
         window.addEventListener('resize', this.resizer)
     },
     // remove our rerender triggers from our data updater and remove map and resize trigger
     unmounted() {
-        PreferenceHolder.removeUpdate(this.updateSettings)
         window.removeEventListener('resize', this.resizer)
         if (this.map) {
             this.map.remove()
@@ -71,10 +68,13 @@ export default {
     },
     computed: {
         ...mapState(deviceStore, ['devices']),
+        ...mapState(settingsStore, ['deviceSettings', 'mapSettings', "allDeviceSettings"]),
+        settings() {
+            return this.mapSettings
+        },
     },
     data() {
         return {
-            search: '',
             // filtered devices to display
             display: [],
             map: null,
@@ -91,15 +91,11 @@ export default {
                 idle: "rgba(135, 206, 250, .67)",
                 offline: "rgba(218, 223, 225, 1)",
             },
-            settings: PreferenceHolder.get().mapSettings ?? {
-                showLabels: true,
-                cluster: true,
-                mapDisplay: 'STREET',
-            },
             selected: null,
         }
     },
     methods: {
+        ...mapActions(settingsStore, ['updateMapSettings']),
         select(device) {
             this.selected = device
             if (device) this.moveCenter([device.lat, device.lng])
@@ -148,13 +144,9 @@ export default {
                 this.fitDevices = true
                 return
             }
-            const prefs = PreferenceHolder.get()?.deviceSettings ?? {}
             this.display = data.filter((d) => {
-                if (prefs[d.device_id]) {
-                    return prefs[d.device_id].visible === undefined || prefs[d.device_id].visible
-                } else {
-                    return true
-                }
+                const deviceSetting = this.deviceSettings(d.device_id)
+                return deviceSetting.visible
             })
             // if map is loaded, update map
             if (this.map && this.loaded) {
@@ -164,6 +156,10 @@ export default {
                     this.map.invalidateSize()
                     // center map on a box that contains all devices
                     if (data.length) this.map.fitBounds(this.getDevicesView())
+                    this.$emit("map-loaded", {
+                        moveCenter: this.moveCenter,
+                        select: this.select
+                    })
                 }
 
                 if (this.display.length && this.featureLayer) {
@@ -181,7 +177,7 @@ export default {
                             // props passed to marker so that we can access them later
                             properties: {
                                 device_id: device.device_id ?? i,
-                                display_name: prefs[device.device_id]?.displayName ?? device.display_name,
+                                display_name: this.deviceSettings(device.device_id).displayName ?? device.display_name,
                                 drive_status: device.drive_status,
                                 drive_status_begin_time: device.drive_status_begin_time,
                                 heading: device.heading,
@@ -198,27 +194,10 @@ export default {
             }
         },
         updateSettings(settings) {
-            let safe
-            if (settings.isPrefs__) {
-                settings = settings.mapSettings ?? {}
-            }
-            else {
-                safe = true
-            }
-            if (settings.cluster !== undefined) this.changeCluster(settings.cluster)
-            if (settings.mapDisplay) {
-                this.changeMapType(settings.mapDisplay?.toLowerCase())
-            }
-            this.settings = {
-                ...this.settings,
-                ...settings,
-            }
-            if (safe) PreferenceHolder.set({ mapSettings: this.settings }, this.updateSettings)
-            this.updateDisplay(this.devices)
+            this.updateMapSettings(settings)
         },
         changeMapType(type, map = this.map) {
             type = type?.toLowerCase()
-
             if (!this.tileLayer) {
                 this.tileLayer = L.tileLayer(null, {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -242,7 +221,7 @@ export default {
                 // renderer: L.canvas(),
             });
 
-            this.changeMapType(this.settings.mapDisplay ?? "street", map)
+            this.changeMapType(this.settings.mapDisplay, map)
             this.changeCluster(this.settings.cluster, map)
 
             this.geoJSON = L.geoJSON(null, {
@@ -336,10 +315,6 @@ export default {
                     // update map size
                     map.invalidateSize()
                     this.loaded = true
-                    this.$emit("map-loaded", {
-                        moveCenter: this.moveCenter,
-                        select: this.select
-                    })
                     this.updateDisplay(this.devices)
                 }, 50)
                 this.map = map
@@ -472,6 +447,24 @@ export default {
             handler(newDevices) {
                 this.updateDisplay(newDevices)
             },
+        },
+        allDeviceSettings: {
+            handler() {
+                this.updateDisplay(this.devices)
+            },
+            deep: true,
+        },
+        settings: {
+            handler(settings) {
+                if (settings.cluster !== undefined) {
+                    this.changeCluster(settings.cluster)
+                }
+                if (settings.mapDisplay !== undefined) {
+                    this.changeMapType(settings.mapDisplay)
+                }
+                this.updateDisplay(this.devices)
+            },
+            deep: true,
         },
     },
 }

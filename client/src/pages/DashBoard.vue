@@ -20,7 +20,7 @@
 import SideBar from '../components/SideBar.vue'
 import MapComponent from '../components/MapComponent.vue'
 import "../assets/one-step.png"
-import { PreferenceHolder, deviceStore } from '@/helpers';
+import { settingsStore, deviceStore } from '@/helpers';
 import { mapActions } from 'pinia';
 
 export default {
@@ -40,6 +40,7 @@ export default {
     },
     methods: {
         ...mapActions(deviceStore, ['startInterval', 'stopInterval', 'refreshDevices']),
+        ...mapActions(settingsStore, ['refreshSettings']),
         // loading triggers + handlers
         setSideLoad(loaded) {
             this.sideLoaded = loaded
@@ -62,7 +63,7 @@ export default {
         },
     },
     mounted() {
-        PreferenceHolder.preferenceReq().then(() => {
+        this.refreshSettings().then(() => {
             this.prefLoad = true
         })
         this.refreshDevices()

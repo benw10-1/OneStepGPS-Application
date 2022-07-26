@@ -16,7 +16,8 @@
                         <span class="filter-group-header-text">Status</span>
                     </div>
                     <div class="filter-group-content">
-                        <FilterButton v-for="(tag, i) of tags" :checked="checked.includes(tag)" :onClick="onChange" :tag="tag" :text="driveStates[tag]" :key="i" />
+                        <FilterButton v-for="(tag, i) of tags" :checked="checked.includes(tag)" :onClick="onChange"
+                            :tag="tag" :text="driveStates[tag]" :key="i" />
                     </div>
                 </div>
             </div>
@@ -26,7 +27,8 @@
 
 <script>
 import ExpandableVue from './Expandable.vue'
-import preferenceHolder from '@/helpers/preferenceHolder'
+import { settingsStore } from '../helpers'
+import { mapState, mapActions } from 'pinia'
 import IconButton from './IconButton.vue'
 import FilterButton from './FilterButton.vue'
 
@@ -43,11 +45,18 @@ export default {
             default: () => ["driving", "idle", "off", "offline"],
         }
     },
+    computed: {
+        ...mapState(settingsStore, ['filterSettings']),
+        checked() {
+            return this.filterSettings?.tags ?? this.tags
+        },
+        disabled() {
+            return this.filterSettings?.disabled ?? false
+        },
+    },
     data() {
         return {
-            checked: this.tags,
             expanded: false,
-            disabled: preferenceHolder.get()?.filter?.disabled,
             driveStates: {
                 off: "Stopped",
                 driving: "Driving",
@@ -56,32 +65,19 @@ export default {
             },
         }
     },
-    mounted() {
-        preferenceHolder.onUpdate(this.prefUpdate)
-    },
-    unmounted() {
-        preferenceHolder.removeUpdate(this.prefUpdate)
-    },
     methods: {
-        prefUpdate(prefs) {
-            // load state
-            this.checked = prefs.filter?.tags ?? this.tags
-            this.disabled = prefs.filter?.disabled ?? false
-        },
+        ...mapActions(settingsStore, ['updateFilter']),
         onChange(tag) {
             // toggle tag
             if (this.checked.includes(tag)) {
-                this.checked = this.checked.filter(t => t !== tag)
+                this.updateFilter({
+                    tags: this.checked.filter(t => t !== tag),
+                })
             } else {
-                this.checked = [...this.checked, tag]
+                this.updateFilter({
+                    tags: [...this.checked, tag],
+                })
             }
-            // override prefs
-            preferenceHolder.set({
-                filter: {
-                    tags: this.checked,
-                    disabled: this.disabled,
-                }
-            }, this.prefUpdate)
         },
         onChangeExpand(expanded) {
             this.expanded = expanded
@@ -90,12 +86,8 @@ export default {
             this.expanded = false
         },
         toggleDisabled() {
-            this.disabled = !this.disabled
-            preferenceHolder.set({
-                filter: {
-                    tags: this.checked,
-                    disabled: this.disabled,
-                }
+            this.updateFilter({
+                disabled: !this.disabled,
             })
         },
     },
@@ -111,6 +103,7 @@ export default {
     padding: 0.5rem;
     box-sizing: border-box;
 }
+
 .filter-header-left {
     display: flex;
     align-items: center;
@@ -129,6 +122,7 @@ export default {
     height: fit-content;
     box-sizing: border-box;
 }
+
 .filter-group-content {
     display: flex;
     width: 100%;
@@ -136,9 +130,7 @@ export default {
     box-sizing: border-box;
     flex-wrap: wrap;
 }
-/* .filter-group-header-text {
-    text-decoration: underline;
-} */
+
 .expanded-icon {
     transform: v-bind("expanded ? '' : 'rotate(-90deg)'");
 }

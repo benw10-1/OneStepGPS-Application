@@ -8,7 +8,7 @@
                 <div class="device-inner">
                     <div class="device-main-info">
                         <div class="device-display-name">
-                            {{ settings.displayName }}
+                            {{ settings.displayName ?? device.display_name }}
                         </div>
                         <div class="device-status">
                             <div :class="'status-text ' + (device.online ? device.drive_status : 'offline')">{{ device.online ? driveStates[device.drive_status] : "No signal" }}</div>
@@ -44,7 +44,8 @@
 
 <script>
 import IconButton from './IconButton.vue'
-import { dateFormatter, PreferenceHolder } from '../helpers'
+import { dateFormatter, settingsStore } from '../helpers'
+import { mapState, mapActions } from 'pinia'
 import ExpandableVue from './Expandable.vue'
 import DeviceInfo from './DeviceInfo.vue'
 import SVGIcon from './SVGIcon.vue'
@@ -63,11 +64,11 @@ export default {
             required: true,
         },
     },
-    mounted() {
-        PreferenceHolder.onUpdate(this.updateSettings)
-    },
-    unmounted() {
-        PreferenceHolder.removeUpdate(this.updateSettings)
+    computed: {
+        ...mapState(settingsStore, ['deviceSettings']),
+        settings() {
+            return this.deviceSettings(this.device.device_id)
+        }
     },
     data() {
         return {
@@ -83,16 +84,11 @@ export default {
                 driving: "Driving",
                 idle: "Idle",
             },
-            // preference map
-            settings: PreferenceHolder.get()?.deviceSettings?.[this.device.device_id] ?? {
-                visible: true,
-                displayName: this.device.display_name,
-                icon: "car",
-            },
             expanded: false
         }
     },
     methods: {
+        ...mapActions(settingsStore, ['updateDeviceSettings']),
         formatTime(time) {
             const date = new Date() - new Date(time)
 
@@ -102,23 +98,7 @@ export default {
             this.expanded = expanded
         },
         updateSettings(settings) {
-            let safe = false
-            if (settings.isPrefs__) {
-                settings = settings?.deviceSettings?.[this.device.device_id] ?? {}
-            }
-            else safe = true
-            this.settings = {
-                ...this.settings,
-                ...settings,
-            }
-
-            // prevent infinite loop
-            if (safe) PreferenceHolder.set({
-                deviceSettings: {
-                    ...PreferenceHolder.get()?.deviceSettings ?? {},
-                    [this.device.device_id]: this.settings,
-                },
-            }, this.updateSettings)
+            this.updateDeviceSettings(this.device.device_id, settings)
         },
     },
     watch: {

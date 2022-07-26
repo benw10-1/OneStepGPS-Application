@@ -14,50 +14,40 @@
 
 <script>
 import ExpandableVue from './Expandable.vue'
-import { PreferenceHolder } from '@/helpers'
+import { settingsStore } from '@/helpers'
+import { mapActions, mapState } from 'pinia'
 
 export default {
     name: "SortBar",
     components: {
         ExpandableVue,
     },
-    mounted() {
-        PreferenceHolder.onUpdate(this.prefUpdate)
-    },
-    unmounted() {
-        PreferenceHolder.removeUpdate(this.prefUpdate)
+    computed: {
+        ...mapState(settingsStore, ['sortSettings']),
     },
     data() {
         return {
-            sort: "none",
             selectedColor: "rgb(25, 118, 210)",
             unselectedColor: "rgba(0, 0, 0, .33)",
         }
     },
     methods: {
+        ...mapActions(settingsStore, ['updateSort']),
         nextSort() {
-            switch (this.sort) {
+            switch (this.sortSettings) {
                 case "none":
-                    this.sort = "asc";
+                    this.updateSort("asc");
                     break;
                 case "asc":
-                    this.sort = "desc";
+                    this.updateSort("desc");
                     break;
                 case "desc":
-                    this.sort = "none";
+                    this.updateSort("none");
                     break;
                 default:
-                    this.sort = "none";
+                    this.updateSort("none");
                     break;
             }
-        },
-        prefUpdate(prefs) {
-            this.sort = prefs.sort ?? "none"
-        },
-    },
-    watch: {
-        sort(newSort) {
-            PreferenceHolder.set({ sort: newSort }, this.prefUpdate)
         },
     },
 }
@@ -90,7 +80,7 @@ export default {
     justify-content: center;
     align-items: center;
     font-size: 1.5rem;
-    color: v-bind("(sort === 'asc') ? selectedColor : unselectedColor");
+    color: v-bind("(sortSettings === 'asc') ? selectedColor : unselectedColor");
     transform: rotate(-90deg);
     transition: all .2s ease-in;
 }
@@ -102,7 +92,7 @@ export default {
     justify-content: center;
     align-items: center;
     font-size: 1.5rem;
-    color: v-bind("(sort === 'desc') ? selectedColor : unselectedColor");
+    color: v-bind("(sortSettings === 'desc') ? selectedColor : unselectedColor");
     transform: rotate(90deg);
     transition: all .2s ease-in;
 }
